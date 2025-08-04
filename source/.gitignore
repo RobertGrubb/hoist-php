@@ -1,8 +1,0 @@
-html
-vendor
-composer.lock
-.env
-.DS_Store
-*.bk
-public/uploads/*.*
-!public/uploads/index.html

@@ -1,0 +1,22 @@
+# Deny direct access to uploaded files unless specifically allowed
+# Uncomment and customize based on your security requirements
+
+# Allow common image types
+<FilesMatch "\.(jpg|jpeg|png|gif|webp)$">
+    Require all granted
+</FilesMatch>
+
+# Allow common document types (customize as needed)
+<FilesMatch "\.(pdf|doc|docx|txt)$">
+    Require all granted
+</FilesMatch>
+
+# Deny execution of PHP and other script files
+<FilesMatch "\.(php|php3|php4|php5|phtml|pl|py|jsp|asp|sh|cgi)$">
+    Require all denied
+</FilesMatch>
+
+# Prevent access to hidden files
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>

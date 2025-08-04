@@ -500,6 +500,208 @@ class UserModel extends Model
 }
 ```
 
+## Caching
+
+Hoist includes a powerful caching system with multiple driver support and automatic fallback. The cache service provides high-performance data storage for frequently accessed information.
+
+### Basic Caching
+
+```php
+// Store data in cache
+$this->instance->cache->set('user.profile.' . $userId, $userData, 3600); // 1 hour TTL
+
+// Retrieve from cache
+$cachedUser = $this->instance->cache->get('user.profile.' . $userId);
+
+if ($cachedUser === null) {
+    // Cache miss - fetch from database
+    $userData = $this->instance->models->user->find($userId);
+    $this->instance->cache->set('user.profile.' . $userId, $userData, 3600);
+}
+```
+
+### Remember Pattern
+
+The `remember()` method simplifies cache-or-execute logic:
+
+```php
+// Cache for 1 hour, execute closure if cache miss
+$popularPosts = $this->instance->cache->remember('posts.popular', 3600, function() {
+    return $this->instance->models->post->getPopular(10);
+});
+
+// Cache forever (until manually cleared)
+$siteSettings = $this->instance->cache->rememberForever('site.settings', function() {
+    return $this->instance->models->settings->getAll();
+});
+```
+
+### Cache Tags for Group Operations
+
+```php
+// Tag cache entries for easy group invalidation
+$this->instance->cache->tags(['users', 'profiles'])
+    ->set('user.profile.' . $userId, $userData, 3600);
+
+$this->instance->cache->tags(['users', 'posts'])
+    ->set('user.posts.' . $userId, $userPosts, 1800);
+
+// Clear all user-related cache
+$this->instance->cache->tags(['users'])->flush();
+```
+
+### Cache Drivers
+
+**File Driver (Default):**
+
+-   Zero configuration required
+-   Stores cache in `Application/Cache/` directory
+-   Perfect for development and small applications
+
+**Redis Driver:**
+
+-   High-performance, distributed caching
+-   Set `CACHE_DRIVER=redis` in `.env`
+-   Automatic fallback to file cache if unavailable
+
+**Memcached Driver:**
+
+-   Memory-based caching with horizontal scaling
+-   Set `CACHE_DRIVER=memcached` in `.env`
+-   Multiple server support for load balancing
+
+### Environment Configuration
+
+```bash
+# .env file
+CACHE_DRIVER=redis
+CACHE_TTL=3600
+CACHE_PREFIX=myapp_
+
+# Redis settings
+REDIS_HOST=127.0.0.1
+REDIS_PORT=6379
+REDIS_DATABASE=0
+```
+
+### Controller Example
+
+```php
+class PostsController extends Controller
+{
+    public function popular()
+    {
+        $posts = $this->instance->cache->remember('posts.popular', 1800, function() {
+            return $this->instance->models->post->getPopular(20);
+        });
+
+        $this->instance->view->render('posts/popular', [
+            'posts' => $posts,
+            'title' => 'Popular Posts'
+        ]);
+    }
+
+    public function invalidateCache()
+    {
+        // Clear specific cache
+        $this->instance->cache->forget('posts.popular');
+
+        // Or clear by tags
+        $this->instance->cache->tags(['posts'])->flush();
+
+        $this->instance->response->redirect('/admin');
+    }
+}
+```
+
+## HTTP Response
+
+Hoist includes a modern, feature-rich Response class for handling all types of HTTP responses with security headers, content negotiation, and fluent method chaining.
+
+### JSON API Responses
+
+```php
+// Simple JSON response
+$this->instance->response->sendJson(['message' => 'Hello World']);
+
+// Success response with data
+$this->instance->response->sendSuccess($userData, 'User retrieved successfully');
+
+// Error response with details
+$this->instance->response->sendError(
+    'Validation failed',
+    400,
+    ['field' => 'email', 'code' => 'INVALID_FORMAT']
+);
+```
+
+### Status Codes and Headers
+
+```php
+// Set custom status code
+$this->instance->response->setStatusCode(201)->sendJson(['created' => true]);
+
+// Add custom headers
+$this->instance->response
+    ->setHeader('X-Custom-Header', 'value')
+    ->setHeader('Cache-Control', 'max-age=3600')
+    ->sendJson($data);
+
+// CORS headers for API endpoints
+$this->instance->response
+    ->setCorsHeaders(['https://example.com'], ['GET', 'POST'], ['Content-Type'])
+    ->sendJson($apiData);
+```
+
+### Content Types and Responses
+
+```php
+// Different content types
+$this->instance->response->json()->setContent($data)->send();
+$this->instance->response->xml()->setContent($xmlData)->send();
+$this->instance->response->text()->setContent('Plain text')->send();
+$this->instance->response->html()->setContent('<h1>HTML</h1>')->send();
+
+// File downloads
+$this->instance->response->download('/path/to/file.pdf', 'report.pdf');
+
+// Redirects
+$this->instance->response->redirect('/dashboard', 302);
+```
+
+### Security Features
+
+```php
+// Security headers are automatically set
+// X-Content-Type-Options: nosniff
+// X-Frame-Options: DENY
+// X-XSS-Protection: 1; mode=block
+// Referrer-Policy: strict-origin-when-cross-origin
+
+// Set secure cookies
+$this->instance->response->setCookie(
+    'session_token',
+    $token,
+    time() + 3600, // 1 hour
+    '/',           // path
+    '',            // domain
+    true,          // secure (HTTPS only)
+    true,          // httpOnly
+    'Strict'       // sameSite
+);
+```
+
+### Fluent Interface Examples
+
+```php
+// Method chaining for complex responses
+$this->instance->response
+    ->setStatusCode(201)
+    ->setHeader('Location', '/users/' . $userId)
+    ->setCookie('last_action', 'user_created')
+    ->sendSuccess(['id' => $userId], 'User created successfully');
+```
+
 ## Views
 
 ### Basic View Rendering

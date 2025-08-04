@@ -89,6 +89,9 @@ class Instance
     /** @var Cron Cron job management service */
     public $cron;
 
+    /** @var Cache High-performance caching service */
+    public $cache;
+
     // ===============================================================
     // APPLICATION STATE PROPERTIES
     // ===============================================================
@@ -150,6 +153,7 @@ class Instance
         "Auth",
         "View",
         "Cron",
+        "Cache",
     ];
 
     // ===============================================================
@@ -375,6 +379,10 @@ class Instance
         $this->view = new View($this);
         $this->router = new Router($this);
         $this->cron = new Cron($this);
+        $this->cache = new Cache([
+            'driver' => $_ENV['CACHE_DRIVER'] ?? 'file',
+            'path' => APPLICATION_DIRECTORY . '/Cache'
+        ]);
 
         // ---------------------------------------------------------------
         // USER PREFERENCE SETUP
