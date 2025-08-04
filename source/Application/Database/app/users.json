@@ -1,0 +1,16 @@
+[
+    {
+        "id": 1,
+        "name": "System Administrator",
+        "email": "admin@site.com",
+        "password": "$2y$10$WkVKki8/S2hlRF9lUsqf6.v0EFCmxTNxv4C3vvDU5qwhaM73yWteG",
+        "user_group_id": "admin",
+        "avatar": null,
+        "email_verified": 1,
+        "status": "active",
+        "last_online": 1754349442,
+        "deleted": 0,
+        "created_at": "2025-08-04 22:30:00",
+        "updated_at": "2025-08-04 19:17:22"
+    }
+]

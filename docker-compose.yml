@@ -1,0 +1,8 @@
+services:
+
+  server:
+    build: './'
+    ports:
+      - "80:80/tcp"
+    volumes:
+      - ./source:/var/www/html/

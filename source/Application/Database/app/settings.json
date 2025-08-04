@@ -1,0 +1,86 @@
+[
+    {
+        "id": 1,
+        "name": "SEO Title",
+        "description": "The title of the platform that would show up on the browser tab / search engines.",
+        "setting": "seo.title",
+        "value": "Updated SEO Title",
+        "type": "input",
+        "options": null,
+        "enabled": 1,
+        "created_at": "2024-12-19 14:08:28",
+        "updated_at": "2025-08-04 22:29:41"
+    },
+    {
+        "id": 2,
+        "name": "Brand Title",
+        "description": "The title that shows up in the navigation bar and in various parts of the platform.",
+        "setting": "brand.title",
+        "value": "Your Application",
+        "type": "input",
+        "options": null,
+        "enabled": 1,
+        "created_at": "2024-12-19 14:15:29",
+        "updated_at": "2024-12-19 14:38:38"
+    },
+    {
+        "id": 3,
+        "name": "SEO Description",
+        "description": "The description of the platform that will show up in search engines.",
+        "setting": "seo.description",
+        "value": "",
+        "type": "textarea",
+        "options": null,
+        "enabled": 0,
+        "created_at": "2024-12-19 14:24:36",
+        "updated_at": "2024-12-19 15:10:06"
+    },
+    {
+        "id": 4,
+        "name": "SEO Image",
+        "description": "The image that will be displayed when sharing this platform to social network platforms and possibly used on search engines.",
+        "setting": "seo.image",
+        "value": "0",
+        "type": "file",
+        "options": null,
+        "enabled": 0,
+        "created_at": "2024-12-19 14:24:36",
+        "updated_at": "2024-12-19 15:10:06"
+    },
+    {
+        "id": 5,
+        "name": "SEO Keywords",
+        "description": "Keywords that describe the platform which are used for optimized seo searches.",
+        "setting": "seo.keywords",
+        "value": "exciting,keywords,for,seo",
+        "type": "input",
+        "options": null,
+        "enabled": 0,
+        "created_at": "2024-12-19 14:24:36",
+        "updated_at": "2024-12-19 15:09:29"
+    },
+    {
+        "id": 6,
+        "name": "Google Analytics Tag",
+        "description": "The code that google provides to gather analytics from your platform.",
+        "setting": "analytics.google_tag",
+        "value": "",
+        "type": "textarea",
+        "options": null,
+        "enabled": 0,
+        "created_at": "2024-12-19 14:49:01",
+        "updated_at": "2024-12-19 14:52:29"
+    },
+    {
+        "id": 7,
+        "name": "Test New_setting",
+        "description": "Custom setting for test.new_setting",
+        "setting": "test.new_setting",
+        "value": "This is a new test setting",
+        "type": "input",
+        "options": null,
+        "enabled": 1,
+        "created_at": "2025-08-04 22:29:41",
+        "updated_at": "2025-08-04 22:29:41"
+    }
+]

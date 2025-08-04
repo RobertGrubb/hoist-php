@@ -1,0 +1,10 @@
+php_value post_max_size 300M
+php_value upload_max_filesize 250M
+php_value upload_max_size 250M
+
+RewriteEngine On
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-l
+RewriteRule ^(.*)$ index.php?$1 [L,QSA]
