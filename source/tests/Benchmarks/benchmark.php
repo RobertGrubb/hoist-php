@@ -38,7 +38,7 @@ class SimpleBenchmark
         // Setup test database directory
         $testDbName = 'benchmark_test';
         $testDbDir = APPLICATION_DIRECTORY . "/Database/" . $testDbName;
-
+        
         if (!is_dir($testDbDir)) {
             mkdir($testDbDir, 0755, true);
         }
@@ -54,21 +54,21 @@ class SimpleBenchmark
         }
 
         // Test FileDatabase initialization
-        $this->measure('FileDatabase Creation', function () use ($testDbName) {
+        $this->measure('FileDatabase Creation', function() use ($testDbName) {
             require_once CORE_DIRECTORY . '/Libraries/FileDatabase.php';
             $db = new FileDatabase($testDbName);
             return $db;
         });
 
         // Test table operations
-        $this->measure('Table Selection', function () use ($testDbName) {
+        $this->measure('Table Selection', function() use ($testDbName) {
             require_once CORE_DIRECTORY . '/Libraries/FileDatabase.php';
             $db = new FileDatabase($testDbName);
             return $db->table('test_table');
         });
 
         // Test data insertion
-        $this->measure('Data Insert', function () use ($testDbName) {
+        $this->measure('Data Insert', function() use ($testDbName) {
             require_once CORE_DIRECTORY . '/Libraries/FileDatabase.php';
             $db = new FileDatabase($testDbName);
             return $db->table('test_table')->insert([
@@ -78,19 +78,19 @@ class SimpleBenchmark
         });
 
         // Test data retrieval
-        $this->measure('Data Retrieval', function () use ($testDbName) {
+        $this->measure('Data Retrieval', function() use ($testDbName) {
             require_once CORE_DIRECTORY . '/Libraries/FileDatabase.php';
             $db = new FileDatabase($testDbName);
             return $db->table('test_table')->all();
         });
 
         // Test filtered queries
-        $this->measure('Filtered Query', function () use ($testDbName) {
+        $this->measure('Filtered Query', function() use ($testDbName) {
             require_once CORE_DIRECTORY . '/Libraries/FileDatabase.php';
             $db = new FileDatabase($testDbName);
             return $db->table('test_table')
-                ->where('email', 'LIKE', '@example.com')
-                ->all();
+                     ->where('email', 'LIKE', '@example.com')
+                     ->all();
         });
 
         // Cleanup (optional - comment out to keep data for debugging)
@@ -111,18 +111,18 @@ class SimpleBenchmark
         echo "-----------------\n";
 
         // Test array operations
-        $this->measure('Array Operations', function () {
+        $this->measure('Array Operations', function() {
             $data = [];
             for ($i = 0; $i < 100; $i++) {
                 $data[] = ['id' => $i, 'name' => "Item $i"];
             }
-            return array_filter($data, function ($item) {
+            return array_filter($data, function($item) {
                 return $item['id'] % 2 === 0;
             });
         });
 
         // Test string operations
-        $this->measure('String Operations', function () {
+        $this->measure('String Operations', function() {
             $text = 'This is a test string for benchmarking purposes.';
             return strtoupper(str_replace(' ', '_', $text));
         });
@@ -136,12 +136,12 @@ class SimpleBenchmark
         echo "---------------------\n";
 
         // Test password hashing
-        $this->measure('Password Hashing', function () {
+        $this->measure('Password Hashing', function() {
             return password_hash('test_password_123', PASSWORD_DEFAULT);
         });
 
         // Test HTML escaping
-        $this->measure('HTML Escaping', function () {
+        $this->measure('HTML Escaping', function() {
             $dangerous = '<script>alert("test")</script><p>Safe content</p>';
             return htmlspecialchars($dangerous, ENT_QUOTES, 'UTF-8');
         });
@@ -155,13 +155,13 @@ class SimpleBenchmark
         echo "-------------------\n";
 
         // Test basic include overhead
-        $this->measure('Core Library Loading', function () {
+        $this->measure('Core Library Loading', function() {
             require_once CORE_DIRECTORY . '/Libraries/Utilities.php';
             return new Utilities();
         });
 
         // Test bootstrap overhead
-        $this->measure('Framework Bootstrap', function () {
+        $this->measure('Framework Bootstrap', function() {
             // Simulate lightweight framework initialization
             $paths = [
                 CORE_DIRECTORY . '/Libraries/Request.php',
@@ -217,12 +217,11 @@ class SimpleBenchmark
         ];
 
         $errorInfo = $errors > 0 ? " | Errors: $errors" : "";
-        printf(
-            "%-25s: %6.3fms avg | %s%s\n",
-            $name,
-            $avgTime,
-            $this->formatBytes($memoryUsed),
-            $errorInfo
+        printf("%-25s: %6.3fms avg | %s%s\n", 
+               $name, 
+               $avgTime,
+               $this->formatBytes($memoryUsed),
+               $errorInfo
         );
     }
 
@@ -275,7 +274,7 @@ class SimpleBenchmark
     private function formatBytes($bytes, $precision = 2)
     {
         $units = ['B', 'KB', 'MB', 'GB'];
-
+        
         for ($i = 0; $bytes > 1024 && $i < count($units) - 1; $i++) {
             $bytes /= 1024;
         }
