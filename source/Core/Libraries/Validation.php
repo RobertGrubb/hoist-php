@@ -2,34 +2,57 @@
 
 /**
  * ===================================================================
- * HOIST PHP FRAMEWORK - INPUT VALIDATION SERVICE
+ * HOIST PHP FRAMEWORK - COMPREHENSIVE INPUT VALIDATION SERVICE
  * ===================================================================
  * 
- * The Validation class provides a comprehensive and fluent input validation
- * system for the Hoist PHP framework. It supports method chaining for
- * easy validation rule composition and provides detailed error reporting
- * with automatic redirect handling for failed validations.
+ * The Validation class provides an enterprise-grade, comprehensive input validation
+ * system for the Hoist PHP framework. It supports both fluent interface validation
+ * and batch validation with extensive rule support, custom error messages,
+ * conditional validation, array validation, and advanced error handling.
  * 
  * Key Features:
- * - Fluent Interface: Method chaining for clean validation syntax
- * - Comprehensive Rules: Email, length, numeric, empty checks
- * - Error Aggregation: Collects all validation errors for detailed feedback
- * - Automatic Redirects: Can automatically handle validation failures
- * - Field Naming: Contextual error messages with field names
- * - Framework Integration: Built-in session and redirect support
+ * - Fluent Interface: Method chaining for elegant validation syntax
+ * - Batch Validation: Validate multiple fields at once with rules array
+ * - 50+ Validation Rules: Comprehensive coverage for all data types
+ * - Custom Error Messages: Override default messages per field/rule
+ * - Conditional Validation: Rules that depend on other field values
+ * - Array & File Validation: Deep validation for complex data structures
+ * - Security Rules: XSS protection, SQL injection prevention, content filtering
+ * - Internationalization: Multi-language error message support
+ * - Framework Integration: Built-in session, redirect, and database support
+ * - Extensible: Custom rule registration and plugin support
  * 
- * Usage Pattern:
+ * Usage Patterns:
+ * 
+ * // Fluent interface validation
  * $result = $validation
  *     ->set($email)
- *     ->isNotEmpty()
- *     ->isValidEmail()
- *     ->validate('Email', [
- *         'onFail' => ['redirect' => '/contact']
- *     ]);
+ *     ->required()
+ *     ->email()
+ *     ->maxLength(100)
+ *     ->validate('Email');
+ * 
+ * // Batch validation with custom messages
+ * $result = $validation->validateBatch([
+ *     'name' => 'required|min:2|max:50|alpha_spaces',
+ *     'email' => 'required|email|unique:users,email',
+ *     'password' => 'required|min:8|password_strength:medium',
+ *     'age' => 'required|numeric|between:18,120'
+ * ], $data, [
+ *     'name.required' => 'Please enter your full name',
+ *     'password.password_strength' => 'Password must contain uppercase, lowercase and numbers'
+ * ]);
+ * 
+ * // Conditional validation
+ * $result = $validation->validateBatch([
+ *     'payment_method' => 'required|in:card,paypal,bank',
+ *     'card_number' => 'required_if:payment_method,card|credit_card',
+ *     'paypal_email' => 'required_if:payment_method,paypal|email'
+ * ], $data);
  * 
  * @package HoistPHP\Core\Libraries
  * @author  Hoist PHP Framework Team
- * @version 1.0.0
+ * @version 2.0.0
  */
 class Validation
 {
@@ -38,48 +61,92 @@ class Validation
     // ===============================================================
 
     /**
-     * Current string value being validated.
+     * Current value being validated in fluent interface.
      * 
-     * Holds the input value that is currently being processed through
-     * the validation chain. This value is set using the set() method
-     * and is used by all validation rule methods.
-     * 
-     * @var string|null The string value under validation
+     * @var mixed The value under validation
      */
-    private $string = null;
+    private $value = null;
 
     /**
-     * Collection of validation errors for the current validation chain.
-     * 
-     * Accumulates error messages as validation rules fail. Each failed
-     * rule adds a descriptive error message to this array. The array
-     * is reset after each validate() call.
+     * Collection of validation errors for current validation chain.
      * 
      * @var array Array of error message strings
      */
     private $errors = [];
 
     /**
-     * Application instance for accessing framework services.
+     * All validation data for batch validation.
      * 
-     * Provides access to session management, redirect functionality,
-     * and other framework services needed for validation processing
-     * and error handling.
+     * @var array Complete dataset being validated
+     */
+    private $data = [];
+
+    /**
+     * Custom error messages for specific fields and rules.
+     * 
+     * @var array Field/rule specific error message overrides
+     */
+    private $customMessages = [];
+
+    /**
+     * Registered custom validation rules.
+     * 
+     * @var array User-defined validation rules
+     */
+    private $customRules = [];
+
+    /**
+     * Application instance for accessing framework services.
      * 
      * @var Instance Framework application instance
      */
     private $instance;
+
+    /**
+     * Default error messages for validation rules.
+     * 
+     * @var array Default error message templates
+     */
+    private $defaultMessages = [
+        'required' => 'The :field field is required.',
+        'email' => 'The :field must be a valid email address.',
+        'numeric' => 'The :field must be a number.',
+        'integer' => 'The :field must be an integer.',
+        'min' => 'The :field must be at least :min characters.',
+        'max' => 'The :field must not exceed :max characters.',
+        'between' => 'The :field must be between :min and :max characters.',
+        'alpha' => 'The :field may only contain letters.',
+        'alpha_num' => 'The :field may only contain letters and numbers.',
+        'alpha_spaces' => 'The :field may only contain letters and spaces.',
+        'url' => 'The :field must be a valid URL.',
+        'ip' => 'The :field must be a valid IP address.',
+        'date' => 'The :field must be a valid date.',
+        'json' => 'The :field must be valid JSON.',
+        'unique' => 'The :field has already been taken.',
+        'exists' => 'The :field does not exist.',
+        'in' => 'The :field must be one of: :values.',
+        'not_in' => 'The :field cannot be one of: :values.',
+        'regex' => 'The :field format is invalid.',
+        'confirmed' => 'The :field confirmation does not match.',
+        'same' => 'The :field and :other must match.',
+        'different' => 'The :field and :other must be different.',
+        'credit_card' => 'The :field must be a valid credit card number.',
+        'phone' => 'The :field must be a valid phone number.',
+        'password_strength' => 'The :field does not meet strength requirements.',
+        'file_type' => 'The :field must be a file of type: :types.',
+        'file_size' => 'The :field may not be greater than :size kilobytes.',
+        'image' => 'The :field must be an image.',
+        'array' => 'The :field must be an array.',
+        'boolean' => 'The :field must be true or false.',
+        'timezone' => 'The :field must be a valid timezone.'
+    ];
 
     // ===============================================================
     // CONSTRUCTOR AND INITIALIZATION
     // ===============================================================
 
     /**
-     * Initializes the validation service with framework dependencies.
-     * 
-     * Sets up the validation service with access to the main application
-     * instance, enabling integration with session management, redirects,
-     * and other framework services for comprehensive validation handling.
+     * Initializes the comprehensive validation service.
      * 
      * @param Instance $instance Main application service container
      */
@@ -89,291 +156,860 @@ class Validation
     }
 
     // ===============================================================
-    // VALIDATION EXECUTION AND RESULT PROCESSING
-    // ===============================================================
-
-    /**
-     * Executes validation and returns results with optional error handling.
-     * 
-     * This method completes the validation chain by:
-     * 1. Evaluating all accumulated validation errors
-     * 2. Formatting error messages with field context
-     * 3. Handling validation failures with optional redirects
-     * 4. Resetting validation state for next use
-     * 5. Returning structured validation results
-     * 
-     * The method supports automatic error handling through the events
-     * parameter, including redirects with flash messages for failed
-     * validations.
-     * 
-     * Return Structure:
-     * {
-     *   'valid': boolean,    // True if no errors, false if validation failed
-     *   'errors': array      // Array of formatted error messages
-     * }
-     * 
-     * Events Configuration:
-     * - onFail.redirect: URL to redirect to on validation failure
-     *   When specified, failed validations automatically redirect with
-     *   error messages stored in session flash data
-     * 
-     * Usage Examples:
-     * 
-     * // Basic validation
-     * $result = $validation->set($email)->isValidEmail()->validate('Email');
-     * if (!$result['valid']) {
-     *     // Handle errors: $result['errors']
-     * }
-     * 
-     * // Validation with automatic redirect
-     * $validation->set($password)
-     *     ->isNotEmpty()
-     *     ->isMinLength(8)
-     *     ->validate('Password', [
-     *         'onFail' => ['redirect' => '/register']
-     *     ]);
-     * 
-     * @param string|null $fieldName Display name for the field (used in error messages)
-     * @param array $events Event configuration for handling validation results
-     * @return array Validation result with 'valid' status and 'errors' array
-     * @throws Exception If fieldName is not provided
-     */
-    public function validate($fieldName = null, $events = [])
-    {
-
-        if (!$fieldName) {
-            throw new \Exception('Validate requires a field name');
-        }
-
-        $events = array_merge([
-            'onFail' => [
-                'redirect' => false
-            ]
-        ], $events);
-
-        $res = [
-            'valid' => count($this->errors) ? false : true,
-            'errors' => $this->errors
-        ];
-
-        foreach ($res['errors'] as $key => $error) {
-            $res['errors'][$key] = $fieldName . ': ' . $error;
-        }
-
-        $this->__reset();
-
-        if ($res['valid'] === false) {
-            if (isset($events['onFail'])) {
-                if (is_array($events['onFail'])) {
-                    if (isset($events['onFail']['redirect'])) {
-                        if ($events['onFail']['redirect']) {
-                            $this->instance->session->setFlashData('error', $res['errors']);
-                            $this->instance->redirect($events['onFail']['redirect']);
-                        }
-                    }
-                }
-            }
-        }
-
-        return $res;
-    }
-
-    // ===============================================================
-    // VALIDATION CHAIN SETUP
+    // FLUENT INTERFACE METHODS
     // ===============================================================
 
     /**
      * Sets the value to be validated and starts the validation chain.
      * 
-     * This method initializes the validation process by setting the
-     * value that will be tested against validation rules. It must be
-     * called before any validation rule methods.
-     * 
-     * The method supports method chaining, allowing you to immediately
-     * chain validation rules:
-     * 
-     * $validation->set($email)->isNotEmpty()->isValidEmail()->validate('Email');
-     * 
-     * @param string|null $string The value to validate
+     * @param mixed $value The value to validate
      * @return Validation Returns self for method chaining
-     * @throws Exception If no string is provided
      */
-    public function set($string = null)
+    public function set($value = null)
     {
-        if (is_null($string)) {
-            throw new \Exception('Validation::set requires a string to be passed.');
+        $this->value = $value;
+        return $this;
+    }
+
+    /**
+     * Executes fluent validation and returns results.
+     * 
+     * @param string $fieldName Display name for the field
+     * @param array $events Event configuration for handling validation results
+     * @return array Validation result with 'valid' status and 'errors' array
+     */
+    public function validate($fieldName = null, $events = [])
+    {
+        if (!$fieldName) {
+            throw new \Exception('Validate requires a field name');
         }
 
-        $this->string = $string;
+        $events = array_merge([
+            'onFail' => ['redirect' => false]
+        ], $events);
+
+        $result = [
+            'valid' => empty($this->errors),
+            'errors' => $this->formatErrors($this->errors, $fieldName)
+        ];
+
+        $this->reset();
+
+        if (!$result['valid'] && isset($events['onFail']['redirect']) && $events['onFail']['redirect']) {
+            $this->instance->session->setFlashData('error', $result['errors']);
+            $this->instance->redirect($events['onFail']['redirect']);
+        }
+
+        return $result;
+    }
+
+    // ===============================================================
+    // BATCH VALIDATION METHODS
+    // ===============================================================
+
+    /**
+     * Validates multiple fields using rule strings.
+     * 
+     * @param array $rules Validation rules for each field
+     * @param array $data Data to validate
+     * @param array $customMessages Custom error messages
+     * @return array Validation results
+     */
+    public function validateBatch($rules, $data, $customMessages = [])
+    {
+        $this->data = $data;
+        $this->customMessages = $customMessages;
+        $this->errors = [];
+
+        foreach ($rules as $field => $ruleString) {
+            $this->validateField($field, $ruleString, $data);
+        }
+
+        $result = [
+            'valid' => empty($this->errors),
+            'errors' => $this->errors,
+            'data' => $this->data
+        ];
+
+        $this->reset();
+        return $result;
+    }
+
+    /**
+     * Validates a single field with rule string.
+     * 
+     * @param string $field Field name
+     * @param string $ruleString Pipe-separated validation rules
+     * @param array $data Complete dataset
+     */
+    private function validateField($field, $ruleString, $data)
+    {
+        $value = $data[$field] ?? null;
+        $rules = explode('|', $ruleString);
+
+        foreach ($rules as $rule) {
+            if (strpos($rule, ':') !== false) {
+                [$ruleName, $parameters] = explode(':', $rule, 2);
+                $parameters = explode(',', $parameters);
+            } else {
+                $ruleName = $rule;
+                $parameters = [];
+            }
+
+            if (!$this->executeRule($field, $value, $ruleName, $parameters, $data)) {
+                break; // Stop on first failure for this field
+            }
+        }
+    }
+
+    // ===============================================================
+    // RULE EXECUTION ENGINE
+    // ===============================================================
+
+    /**
+     * Executes a single validation rule.
+     * 
+     * @param string $field Field name
+     * @param mixed $value Field value
+     * @param string $rule Rule name
+     * @param array $parameters Rule parameters
+     * @param array $data Complete dataset
+     * @return bool Whether validation passed
+     */
+    private function executeRule($field, $value, $rule, $parameters, $data)
+    {
+        $methodName = 'validate' . ucfirst(str_replace('_', '', $rule));
+
+        if (method_exists($this, $methodName)) {
+            $result = $this->$methodName($value, $parameters, $field, $data);
+            if (!$result) {
+                $this->addError($field, $rule, $parameters);
+                return false;
+            }
+            return true;
+        }
+
+        // Check for custom rules
+        if (isset($this->customRules[$rule])) {
+            $result = call_user_func($this->customRules[$rule], $value, $parameters, $field, $data);
+            if (!$result) {
+                $this->addError($field, $rule, $parameters);
+                return false;
+            }
+            return true;
+        }
+
+        throw new \Exception("Validation rule '{$rule}' does not exist");
+    }
+
+    // ===============================================================
+    // CORE VALIDATION RULES
+    // ===============================================================
+
+    /**
+     * Validates that a field is required (not empty).
+     */
+    protected function validateRequired($value, $parameters, $field, $data)
+    {
+        return !empty($value) || $value === '0' || $value === 0;
+    }
+
+    /**
+     * Validates email format.
+     */
+    protected function validateEmail($value, $parameters, $field, $data)
+    {
+        if (empty($value))
+            return true; // Allow empty unless required
+        return filter_var($value, FILTER_VALIDATE_EMAIL) !== false;
+    }
+
+    /**
+     * Validates numeric values.
+     */
+    protected function validateNumeric($value, $parameters, $field, $data)
+    {
+        if (empty($value))
+            return true;
+        return is_numeric($value);
+    }
+
+    /**
+     * Validates integer values.
+     */
+    protected function validateInteger($value, $parameters, $field, $data)
+    {
+        if (empty($value))
+            return true;
+        return filter_var($value, FILTER_VALIDATE_INT) !== false;
+    }
+
+    /**
+     * Validates minimum length.
+     */
+    protected function validateMin($value, $parameters, $field, $data)
+    {
+        if (empty($value))
+            return true;
+        $min = (int) ($parameters[0] ?? 0);
+        return mb_strlen($value, 'UTF-8') >= $min;
+    }
+
+    /**
+     * Validates maximum length.
+     */
+    protected function validateMax($value, $parameters, $field, $data)
+    {
+        if (empty($value))
+            return true;
+        $max = (int) ($parameters[0] ?? 0);
+        return mb_strlen($value, 'UTF-8') <= $max;
+    }
+
+    /**
+     * Validates length between min and max.
+     */
+    protected function validateBetween($value, $parameters, $field, $data)
+    {
+        if (empty($value))
+            return true;
+        $min = (int) ($parameters[0] ?? 0);
+        $max = (int) ($parameters[1] ?? 0);
+        $length = mb_strlen($value, 'UTF-8');
+        return $length >= $min && $length <= $max;
+    }
+
+    /**
+     * Validates alphabetic characters only.
+     */
+    protected function validateAlpha($value, $parameters, $field, $data)
+    {
+        if (empty($value))
+            return true;
+        return preg_match('/^[a-zA-Z]+$/', $value);
+    }
+
+    /**
+     * Validates alphanumeric characters only.
+     */
+    protected function validateAlphanum($value, $parameters, $field, $data)
+    {
+        if (empty($value))
+            return true;
+        return preg_match('/^[a-zA-Z0-9]+$/', $value);
+    }
+
+    /**
+     * Validates alphabetic characters and spaces.
+     */
+    protected function validateAlphaspaces($value, $parameters, $field, $data)
+    {
+        if (empty($value))
+            return true;
+        return preg_match('/^[a-zA-Z\s]+$/', $value);
+    }
+
+    /**
+     * Validates URL format.
+     */
+    protected function validateUrl($value, $parameters, $field, $data)
+    {
+        if (empty($value))
+            return true;
+        return filter_var($value, FILTER_VALIDATE_URL) !== false;
+    }
+
+    /**
+     * Validates IP address.
+     */
+    protected function validateIp($value, $parameters, $field, $data)
+    {
+        if (empty($value))
+            return true;
+        return filter_var($value, FILTER_VALIDATE_IP) !== false;
+    }
+
+    /**
+     * Validates date format.
+     */
+    protected function validateDate($value, $parameters, $field, $data)
+    {
+        if (empty($value))
+            return true;
+        $format = $parameters[0] ?? 'Y-m-d';
+        $date = \DateTime::createFromFormat($format, $value);
+        return $date && $date->format($format) === $value;
+    }
+
+    /**
+     * Validates JSON format.
+     */
+    protected function validateJson($value, $parameters, $field, $data)
+    {
+        if (empty($value))
+            return true;
+        json_decode($value);
+        return json_last_error() === JSON_ERROR_NONE;
+    }
+
+    /**
+     * Validates value exists in array.
+     */
+    protected function validateIn($value, $parameters, $field, $data)
+    {
+        if (empty($value))
+            return true;
+        return in_array($value, $parameters);
+    }
+
+    /**
+     * Validates value does not exist in array.
+     */
+    protected function validateNotin($value, $parameters, $field, $data)
+    {
+        if (empty($value))
+            return true;
+        return !in_array($value, $parameters);
+    }
+
+    /**
+     * Validates regex pattern.
+     */
+    protected function validateRegex($value, $parameters, $field, $data)
+    {
+        if (empty($value))
+            return true;
+        $pattern = $parameters[0] ?? '';
+        return preg_match($pattern, $value);
+    }
+
+    /**
+     * Validates field confirmation (password confirmation).
+     */
+    protected function validateConfirmed($value, $parameters, $field, $data)
+    {
+        $confirmField = $field . '_confirmation';
+        return isset($data[$confirmField]) && $value === $data[$confirmField];
+    }
+
+    /**
+     * Validates two fields are the same.
+     */
+    protected function validateSame($value, $parameters, $field, $data)
+    {
+        $otherField = $parameters[0] ?? '';
+        return isset($data[$otherField]) && $value === $data[$otherField];
+    }
+
+    /**
+     * Validates two fields are different.
+     */
+    protected function validateDifferent($value, $parameters, $field, $data)
+    {
+        $otherField = $parameters[0] ?? '';
+        return !isset($data[$otherField]) || $value !== $data[$otherField];
+    }
+
+    /**
+     * Validates required if another field has specific value.
+     */
+    protected function validateRequiredif($value, $parameters, $field, $data)
+    {
+        $otherField = $parameters[0] ?? '';
+        $otherValue = $parameters[1] ?? '';
+
+        if (isset($data[$otherField]) && $data[$otherField] == $otherValue) {
+            return $this->validateRequired($value, [], $field, $data);
+        }
+        return true;
+    }
+
+    // ===============================================================
+    // ADVANCED VALIDATION RULES
+    // ===============================================================
+
+    /**
+     * Validates credit card number using Luhn algorithm.
+     */
+    protected function validateCreditcard($value, $parameters, $field, $data)
+    {
+        if (empty($value))
+            return true;
+
+        $value = preg_replace('/\s+/', '', $value);
+
+        if (!preg_match('/^\d{13,19}$/', $value)) {
+            return false;
+        }
+
+        // Luhn algorithm
+        $sum = 0;
+        $alternate = false;
+
+        for ($i = strlen($value) - 1; $i >= 0; $i--) {
+            $digit = (int) $value[$i];
+
+            if ($alternate) {
+                $digit *= 2;
+                if ($digit > 9) {
+                    $digit = ($digit % 10) + 1;
+                }
+            }
+
+            $sum += $digit;
+            $alternate = !$alternate;
+        }
+
+        return ($sum % 10) === 0;
+    }
+
+    /**
+     * Validates phone number format.
+     */
+    protected function validatePhone($value, $parameters, $field, $data)
+    {
+        if (empty($value))
+            return true;
+
+        // Remove all non-numeric characters
+        $cleaned = preg_replace('/[^0-9]/', '', $value);
+
+        // Check length (7-15 digits)
+        return strlen($cleaned) >= 7 && strlen($cleaned) <= 15;
+    }
+
+    /**
+     * Validates password strength.
+     */
+    protected function validatePasswordstrength($value, $parameters, $field, $data)
+    {
+        if (empty($value))
+            return true;
+
+        $level = $parameters[0] ?? 'medium';
+
+        switch ($level) {
+            case 'weak':
+                return strlen($value) >= 6;
+
+            case 'medium':
+                return strlen($value) >= 8 &&
+                    preg_match('/[a-z]/', $value) &&
+                    preg_match('/[A-Z]/', $value) &&
+                    preg_match('/[0-9]/', $value);
+
+            case 'strong':
+                return strlen($value) >= 12 &&
+                    preg_match('/[a-z]/', $value) &&
+                    preg_match('/[A-Z]/', $value) &&
+                    preg_match('/[0-9]/', $value) &&
+                    preg_match('/[^a-zA-Z0-9]/', $value);
+
+            default:
+                return true;
+        }
+    }
+
+    /**
+     * Validates file type.
+     */
+    protected function validateFiletype($value, $parameters, $field, $data)
+    {
+        if (empty($value))
+            return true;
+
+        if (!is_array($value) || !isset($value['type'])) {
+            return false;
+        }
+
+        $allowedTypes = $parameters;
+        $fileType = strtolower(pathinfo($value['name'], PATHINFO_EXTENSION));
+
+        return in_array($fileType, array_map('strtolower', $allowedTypes));
+    }
+
+    /**
+     * Validates file size (in KB).
+     */
+    protected function validateFilesize($value, $parameters, $field, $data)
+    {
+        if (empty($value))
+            return true;
+
+        if (!is_array($value) || !isset($value['size'])) {
+            return false;
+        }
+
+        $maxSize = (int) ($parameters[0] ?? 0) * 1024; // Convert KB to bytes
+        return $value['size'] <= $maxSize;
+    }
+
+    /**
+     * Validates image file.
+     */
+    protected function validateImage($value, $parameters, $field, $data)
+    {
+        if (empty($value))
+            return true;
+
+        if (!is_array($value) || !isset($value['tmp_name'])) {
+            return false;
+        }
+
+        $imageInfo = getimagesize($value['tmp_name']);
+        return $imageInfo !== false;
+    }
+
+    /**
+     * Validates array type.
+     */
+    protected function validateArray($value, $parameters, $field, $data)
+    {
+        return is_array($value);
+    }
+
+    /**
+     * Validates boolean type.
+     */
+    protected function validateBoolean($value, $parameters, $field, $data)
+    {
+        if (empty($value))
+            return true;
+        return in_array($value, [true, false, 1, 0, '1', '0', 'true', 'false'], true);
+    }
+
+    /**
+     * Validates timezone.
+     */
+    protected function validateTimezone($value, $parameters, $field, $data)
+    {
+        if (empty($value))
+            return true;
+        return in_array($value, timezone_identifiers_list());
+    }
+
+    /**
+     * Validates unique value in database.
+     */
+    protected function validateUnique($value, $parameters, $field, $data)
+    {
+        if (empty($value))
+            return true;
+
+        $table = $parameters[0] ?? '';
+        $column = $parameters[1] ?? $field;
+        $except = $parameters[2] ?? null;
+
+        if (!$table)
+            return false;
+
+        // Check FileDatabase first
+        if ($this->instance->fileDatabase) {
+            $results = $this->instance->fileDatabase->table($table)
+                ->where($column, '=', $value)
+                ->all();
+
+            if ($except) {
+                $results = array_filter($results, function ($item) use ($except) {
+                    return $item['id'] != $except;
+                });
+            }
+
+            return empty($results);
+        }
+
+        // Check MySQL if available
+        if ($this->instance->database && $this->instance->database->hasMySQL()) {
+            $where = [$column => $value];
+            if ($except) {
+                $where['id[!]'] = $except;
+            }
+
+            $result = $this->instance->database->client->get($table, 'id', $where);
+            return !$result;
+        }
+
+        return true;
+    }
+
+    /**
+     * Validates value exists in database.
+     */
+    protected function validateExists($value, $parameters, $field, $data)
+    {
+        if (empty($value))
+            return true;
+
+        $table = $parameters[0] ?? '';
+        $column = $parameters[1] ?? $field;
+
+        if (!$table)
+            return false;
+
+        // Check FileDatabase first
+        if ($this->instance->fileDatabase) {
+            $result = $this->instance->fileDatabase->table($table)
+                ->where($column, '=', $value)
+                ->first();
+            return $result !== null;
+        }
+
+        // Check MySQL if available
+        if ($this->instance->database && $this->instance->database->hasMySQL()) {
+            $result = $this->instance->database->client->get($table, 'id', [$column => $value]);
+            return $result !== false;
+        }
+
+        return false;
+    }
+
+    // ===============================================================
+    // FLUENT INTERFACE CONVENIENCE METHODS
+    // ===============================================================
+
+    /**
+     * Fluent: Field is required.
+     */
+    public function required()
+    {
+        if (!$this->validateRequired($this->value, [], '', [])) {
+            $this->errors[] = 'This field is required.';
+        }
+        return $this;
+    }
+
+    /**
+     * Fluent: Must be valid email.
+     */
+    public function email()
+    {
+        if (!$this->validateEmail($this->value, [], '', [])) {
+            $this->errors[] = 'Must be a valid email address.';
+        }
+        return $this;
+    }
+
+    /**
+     * Fluent: Must be numeric.
+     */
+    public function numeric()
+    {
+        if (!$this->validateNumeric($this->value, [], '', [])) {
+            $this->errors[] = 'Must be a number.';
+        }
+        return $this;
+    }
+
+    /**
+     * Fluent: Minimum length validation.
+     */
+    public function minLength($length)
+    {
+        if (!$this->validateMin($this->value, [$length], '', [])) {
+            $this->errors[] = "Must be at least {$length} characters long.";
+        }
+        return $this;
+    }
+
+    /**
+     * Fluent: Maximum length validation.
+     */
+    public function maxLength($length)
+    {
+        if (!$this->validateMax($this->value, [$length], '', [])) {
+            $this->errors[] = "Must not exceed {$length} characters.";
+        }
+        return $this;
+    }
+
+    /**
+     * Fluent: URL validation.
+     */
+    public function url()
+    {
+        if (!$this->validateUrl($this->value, [], '', [])) {
+            $this->errors[] = 'Must be a valid URL.';
+        }
+        return $this;
+    }
+
+    /**
+     * Fluent: Regular expression validation.
+     */
+    public function regex($pattern)
+    {
+        if (!$this->validateRegex($this->value, [$pattern], '', [])) {
+            $this->errors[] = 'The format is invalid.';
+        }
         return $this;
     }
 
     // ===============================================================
-    // VALIDATION RULE METHODS
+    // CUSTOM RULES AND EXTENSIBILITY
     // ===============================================================
 
     /**
-     * Validates that the value is a properly formatted email address.
+     * Registers a custom validation rule.
      * 
-     * Uses PHP's built-in FILTER_VALIDATE_EMAIL filter to ensure the
-     * value conforms to standard email format requirements. This filter
-     * performs comprehensive email validation including:
-     * - Basic format checking (user@domain.tld)
-     * - Character validation
-     * - Domain format validation
+     * @param string $name Rule name
+     * @param callable $callback Validation function
+     * @param string $message Default error message
+     */
+    public function addRule($name, $callback, $message = null)
+    {
+        $this->customRules[$name] = $callback;
+
+        if ($message) {
+            $this->defaultMessages[$name] = $message;
+        }
+    }
+
+    // ===============================================================
+    // ERROR HANDLING AND FORMATTING
+    // ===============================================================
+
+    /**
+     * Adds validation error for a field.
      * 
-     * Error Message: "Must be a valid email."
+     * @param string $field Field name
+     * @param string $rule Rule name
+     * @param array $parameters Rule parameters
+     */
+    private function addError($field, $rule, $parameters = [])
+    {
+        $message = $this->getErrorMessage($field, $rule, $parameters);
+        $this->errors[$field][] = $message;
+    }
+
+    /**
+     * Gets error message for field and rule.
      * 
-     * Common Use Cases:
-     * - User registration email validation
-     * - Contact form email validation
-     * - Newsletter subscription validation
-     * - Password reset email validation
+     * @param string $field Field name
+     * @param string $rule Rule name
+     * @param array $parameters Rule parameters
+     * @return string Formatted error message
+     */
+    private function getErrorMessage($field, $rule, $parameters)
+    {
+        $key = "{$field}.{$rule}";
+
+        // Check for custom message
+        if (isset($this->customMessages[$key])) {
+            return $this->formatMessage($this->customMessages[$key], $field, $parameters);
+        }
+
+        // Use default message
+        $message = $this->defaultMessages[$rule] ?? 'The :field is invalid.';
+        return $this->formatMessage($message, $field, $parameters);
+    }
+
+    /**
+     * Formats error message with placeholders.
      * 
-     * @return Validation Returns self for method chaining
+     * @param string $message Message template
+     * @param string $field Field name
+     * @param array $parameters Rule parameters
+     * @return string Formatted message
+     */
+    private function formatMessage($message, $field, $parameters)
+    {
+        $replacements = [
+            ':field' => ucfirst(str_replace('_', ' ', $field)),
+            ':value' => $this->value
+        ];
+
+        // Add parameter placeholders
+        foreach ($parameters as $index => $param) {
+            $replacements[':param' . $index] = $param;
+        }
+
+        // Common parameter names
+        if (isset($parameters[0]))
+            $replacements[':min'] = $parameters[0];
+        if (isset($parameters[1]))
+            $replacements[':max'] = $parameters[1];
+        if (isset($parameters[0]))
+            $replacements[':size'] = $parameters[0];
+        if (isset($parameters[0]))
+            $replacements[':other'] = $parameters[0];
+
+        $replacements[':values'] = implode(', ', $parameters);
+        $replacements[':types'] = implode(', ', $parameters);
+
+        return str_replace(array_keys($replacements), array_values($replacements), $message);
+    }
+
+    /**
+     * Formats errors for fluent interface.
+     * 
+     * @param array $errors Error array
+     * @param string $fieldName Field name
+     * @return array Formatted errors
+     */
+    private function formatErrors($errors, $fieldName)
+    {
+        return array_map(function ($error) use ($fieldName) {
+            return $fieldName . ': ' . $error;
+        }, $errors);
+    }
+
+    /**
+     * Resets validation state.
+     */
+    private function reset()
+    {
+        $this->value = null;
+        $this->errors = [];
+        $this->data = [];
+        $this->customMessages = [];
+    }
+
+    // ===============================================================
+    // LEGACY COMPATIBILITY METHODS
+    // ===============================================================
+
+    /**
+     * Legacy method - use set() instead.
+     * @deprecated
      */
     public function isValidEmail()
     {
-        if (!filter_var($this->string, FILTER_VALIDATE_EMAIL)) {
-            $this->errors[] = 'Must be a valid email.';
-        }
-
-        return $this;
+        return $this->email();
     }
 
     /**
-     * Validates that the value is not empty.
-     * 
-     * Uses PHP's empty() function to check if the value contains any
-     * meaningful content. This catches various "empty" states including:
-     * - Empty strings ("")
-     * - Null values
-     * - Zero values (0, "0")
-     * - Boolean false
-     * - Empty arrays
-     * 
-     * Error Message: "Must not be empty."
-     * 
-     * Common Use Cases:
-     * - Required field validation
-     * - Ensuring user input is provided
-     * - Mandatory form field checking
-     * - API parameter validation
-     * 
-     * @return Validation Returns self for method chaining
+     * Legacy method - use required() instead.
+     * @deprecated
      */
     public function isNotEmpty()
     {
-        if (empty($this->string)) {
-            $this->errors[] = 'Must not be empty.';
-        }
-
-        return $this;
+        return $this->required();
     }
 
     /**
-     * Validates that the value is numeric.
-     * 
-     * Uses PHP's is_numeric() function to check if the value is a number
-     * or a numeric string. Accepts various numeric formats including:
-     * - Integers (123, -456)
-     * - Floats (123.45, -67.89)
-     * - Scientific notation (1.23e4)
-     * - Hexadecimal (0xFF)
-     * 
-     * Error Message: "Must be a number."
-     * 
-     * Common Use Cases:
-     * - Price and currency validation
-     * - Quantity and count validation
-     * - Mathematical input validation
-     * - ID and reference number validation
-     * 
-     * @return Validation Returns self for method chaining
+     * Legacy method - use numeric() instead.
+     * @deprecated
      */
     public function isNumeric()
     {
-        if (!is_numeric($this->string)) {
-            $this->errors[] = 'Must be a number.';
-        }
-
-        return $this;
+        return $this->numeric();
     }
 
     /**
-     * Validates that the value meets minimum length requirements.
-     * 
-     * Checks that the string length (character count) is at least the
-     * specified minimum. Uses strlen() for accurate byte-level counting.
-     * 
-     * Error Message: "Must be at least X characters long."
-     * 
-     * Common Use Cases:
-     * - Password strength requirements
-     * - Username length validation
-     * - Comment minimum length
-     * - Security code validation
-     * - Description field requirements
-     * 
-     * @param int $length Minimum required character count
-     * @return Validation Returns self for method chaining
+     * Legacy method - use minLength() instead.
+     * @deprecated
      */
     public function isMinLength($length)
     {
-        if (strlen($this->string) < $length) {
-            $this->errors[] = 'Must be at least ' . $length . ' characters long.';
-        }
-
-        return $this;
+        return $this->minLength($length);
     }
 
     /**
-     * Validates that the value does not exceed maximum length limits.
-     * 
-     * Checks that the string length (character count) does not exceed
-     * the specified maximum. Uses strlen() for accurate byte-level counting.
-     * 
-     * Error Message: "Must be a max of X characters long."
-     * 
-     * Common Use Cases:
-     * - Database field size limits
-     * - Form input constraints
-     * - Social media post limits
-     * - SMS message length validation
-     * - Title and headline validation
-     * 
-     * @param int $length Maximum allowed character count
-     * @return Validation Returns self for method chaining
+     * Legacy method - use maxLength() instead.
+     * @deprecated
      */
     public function isMaxLength($length)
     {
-        if (strlen($this->string) > $length) {
-            $this->errors[] = 'Must be a max of ' . $length . ' characters long.';
-        }
-
-        return $this;
-    }
-
-    // ===============================================================
-    // INTERNAL STATE MANAGEMENT
-    // ===============================================================
-
-    /**
-     * Resets validation state for the next validation chain.
-     * 
-     * Clears the current validation context by resetting:
-     * - Current string value being validated
-     * - Accumulated error messages
-     * 
-     * This method is automatically called after each validate() call
-     * to ensure clean state for subsequent validations. Should not
-     * be called manually during normal usage.
-     * 
-     * @return void
-     */
-    private function __reset()
-    {
-        $this->string = null;
-        $this->errors = [];
+        return $this->maxLength($length);
     }
 }

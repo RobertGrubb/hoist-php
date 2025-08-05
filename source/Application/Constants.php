@@ -24,6 +24,7 @@ defined("APPLICATION_STYLESHEETS") || define("APPLICATION_STYLESHEETS", [
  * in the header of the template.
  */
 defined("APPLICATION_HEADER_SCRIPTS") || define("APPLICATION_HEADER_SCRIPTS", [
+    'https://cdn.tailwindcss.com',
     'https://code.jquery.com/jquery-3.7.1.min.js',
 ]);
 
@@ -32,9 +33,7 @@ defined("APPLICATION_HEADER_SCRIPTS") || define("APPLICATION_HEADER_SCRIPTS", [
  * on template
  */
 defined("APPLICATION_SCRIPTS") || define("APPLICATION_SCRIPTS", [
-    '/assets/scripts/libraries/mdb.umd.min.js',
-]);
-
-defined("APPLICATION_MODULE_SCRIPTS") || define("APPLICATION_MODULE_SCRIPTS", [
     '/assets/scripts/app.js',
 ]);
+
+defined("APPLICATION_MODULE_SCRIPTS") || define("APPLICATION_MODULE_SCRIPTS", []);
