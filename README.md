@@ -5,7 +5,26 @@ A lightweight, modern PHP MVC framework designed for rapid development with **ze
 ![PHP Version](https://img.shields.io/badge/PHP-%3E%3D8.1-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Framework](https://img.shields.io/badge/Framework-MVC-orange)
-![Components](https://img.shields.io/badge/UI-Components-purple)
+![Components](https://img.shi## 📚 **Complete API Documentation**
+
+Hoist includes **comprehensive API documentation** for all framework components:
+
+### 💾 **Primary Storage System**
+
+-   **[FileDatabase API](docs/api/FileDatabase.md)** - Zero-configuration JSON database with SQL-like queries (default storage)
+
+### 🧩 **Component System (The Bread and Butter!)**
+
+-   **[Components API](docs/api/Components.md)** - Dynamic component system for reusable UI elements and modular architecture
+
+### 🔗 **Core Framework APIs**
+
+-   **[Authentication API](docs/api/Authentication.md)** - User authentication, sessions, and role-based access
+-   **[Database API](docs/api/Database.md)** - MySQL and FileDatabase operations with query building
+-   **[Model API](docs/api/Model.md)** - Active Record pattern with security features and validation
+-   **[Request API](docs/api/Request.md)** - HTTP request handling, data validation, and file uploads
+-   **[Response API](docs/api/Response.md)** - JSON responses, redirects, and content delivery
+-   **[Router API](docs/api/Router.md)** - URL routing, parameter extraction, and nested controllers-Components-purple)
 
 ## ✨ What Makes Hoist Special?
 
@@ -430,7 +449,11 @@ chmod -R 755 Application/Database/
 
 Hoist includes **comprehensive API documentation** for all framework components:
 
-### 🔗 **Core Framework APIs**
+### � **Primary Storage System**
+
+-   **[FileDatabase API](docs/api/FileDatabase.md)** - Zero-configuration JSON database with SQL-like queries (default storage)
+
+### �🔗 **Core Framework APIs**
 
 -   **[Authentication API](docs/api/Authentication.md)** - User authentication, sessions, and role-based access
 -   **[Database API](docs/api/Database.md)** - MySQL and FileDatabase operations with query building
