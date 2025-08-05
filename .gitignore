@@ -11,6 +11,8 @@ source/Application/Cache/*
 !source/Application/Cache/.htaccess
 !source/Application/Cache/README.md
 
+dev/
+
 # Temporary cache files
 *.cache
 *.tmp
