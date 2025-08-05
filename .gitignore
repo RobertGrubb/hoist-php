@@ -13,6 +13,8 @@ source/Application/Cache/*
 
 dev/
 
+source/Application/Database/benchmark_test/
+
 # Temporary cache files
 *.cache
 *.tmp
