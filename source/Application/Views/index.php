@@ -55,54 +55,16 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <!-- Feature 1: Zero Configuration -->
-            <div
-                class="bg-white rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-lg transition-shadow duration-200">
-                <div class="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-lg mb-4">
-                    <i class="fas fa-rocket text-blue-600 text-xl"></i>
-                </div>
-                <h3 class="text-xl font-semibold text-gray-900 mb-3">Zero Configuration</h3>
-                <p class="text-gray-600 leading-relaxed">
-                    Start building immediately with smart defaults and automatic service discovery. No complex setup
-                    required.
-                </p>
-            </div>
+            <?= $components->render('Layout.FeatureCard', ['title' => 'Zero Configuration', 'description' => 'Start building immediately with smart defaults and automatic service discovery. No complex setup required.', 'icon' => 'fas fa-rocket', 'color' => 'blue']) ?>
 
             <!-- Feature 2: FileDatabase -->
-            <div
-                class="bg-white rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-lg transition-shadow duration-200">
-                <div class="flex items-center justify-center w-12 h-12 bg-green-100 rounded-lg mb-4">
-                    <i class="fas fa-database text-green-600 text-xl"></i>
-                </div>
-                <h3 class="text-xl font-semibold text-gray-900 mb-3">FileDatabase System</h3>
-                <p class="text-gray-600 leading-relaxed">
-                    Build applications without database setup using our efficient JSON-based storage with MySQL
-                    fallback.
-                </p>
-            </div>
+            <?= $components->render('Layout.FeatureCard', ['title' => 'FileDatabase System', 'description' => 'Build applications without database setup using our efficient JSON-based storage with MySQL fallback.', 'icon' => 'fas fa-database', 'color' => 'green']) ?>
 
             <!-- Feature 3: Caching -->
-            <div
-                class="bg-white rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-lg transition-shadow duration-200">
-                <div class="flex items-center justify-center w-12 h-12 bg-purple-100 rounded-lg mb-4">
-                    <i class="fas fa-tachometer-alt text-purple-600 text-xl"></i>
-                </div>
-                <h3 class="text-xl font-semibold text-gray-900 mb-3">High-Performance Caching</h3>
-                <p class="text-gray-600 leading-relaxed">
-                    Multi-tier caching with Redis, Memcached, and file-based storage options for optimal performance.
-                </p>
-            </div>
+            <?= $components->render('Layout.FeatureCard', ['title' => 'High-Performance Caching', 'description' => 'Multi-tier caching with Redis, Memcached, and file-based storage options for optimal performance.', 'icon' => 'fas fa-tachometer-alt', 'color' => 'purple']) ?>
 
             <!-- Feature 4: Authentication -->
-            <div
-                class="bg-white rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-lg transition-shadow duration-200">
-                <div class="flex items-center justify-center w-12 h-12 bg-red-100 rounded-lg mb-4">
-                    <i class="fas fa-shield-alt text-red-600 text-xl"></i>
-                </div>
-                <h3 class="text-xl font-semibold text-gray-900 mb-3">Built-in Authentication</h3>
-                <p class="text-gray-600 leading-relaxed">
-                    Secure user management with modern password hashing, session handling, and role-based access.
-                </p>
-            </div>
+            <?= $components->render('Layout.FeatureCard', ['title' => 'Built-in Authentication', 'description' => 'Secure user management with modern password hashing, session handling, and role-based access.', 'icon' => 'fas fa-shield-alt', 'color' => 'red']) ?>
         </div>
     </section>
 
@@ -115,49 +77,14 @@
                         Modern Development Features
                     </h2>
                     <div class="space-y-4">
-                        <div class="flex items-start space-x-3">
-                            <div
-                                class="flex-shrink-0 w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mt-0.5">
-                                <i class="fas fa-check text-blue-600 text-sm"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-semibold text-gray-900">Enhanced Validation</h4>
-                                <p class="text-gray-600">30+ validation rules with custom messages and batch processing
-                                </p>
-                            </div>
-                        </div>
-                        <div class="flex items-start space-x-3">
-                            <div
-                                class="flex-shrink-0 w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mt-0.5">
-                                <i class="fas fa-check text-green-600 text-sm"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-semibold text-gray-900">Security-First Cleaning</h4>
-                                <p class="text-gray-600">XSS prevention, SQL injection protection, and HTML sanitization
-                                </p>
-                            </div>
-                        </div>
-                        <div class="flex items-start space-x-3">
-                            <div
-                                class="flex-shrink-0 w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center mt-0.5">
-                                <i class="fas fa-check text-purple-600 text-sm"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-semibold text-gray-900">Docker Ready</h4>
-                                <p class="text-gray-600">Production-ready containerization with single command
-                                    deployment</p>
-                            </div>
-                        </div>
-                        <div class="flex items-start space-x-3">
-                            <div
-                                class="flex-shrink-0 w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center mt-0.5">
-                                <i class="fas fa-check text-yellow-600 text-sm"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-semibold text-gray-900">Tailwind CSS Integration</h4>
-                                <p class="text-gray-600">Modern utility-first CSS framework included out of the box</p>
-                            </div>
-                        </div>
+                        <?= $components->render('Layout.FeatureList', [
+                            'features' => [
+                                ['title' => 'Enhanced Validation', 'description' => '30+ validation rules with custom messages and batch processing'],
+                                ['title' => 'Security-First Cleaning', 'description' => 'XSS prevention, SQL injection protection, and HTML sanitization'],
+                                ['title' => 'Docker Ready', 'description' => 'Production-ready containerization with single command deployment'],
+                                ['title' => 'Tailwind CSS Integration', 'description' => 'Modern utility-first CSS framework included out of the box']
+                            ]
+                        ]) ?>
                     </div>
                 </div>
                 <div class="text-center lg:text-right">

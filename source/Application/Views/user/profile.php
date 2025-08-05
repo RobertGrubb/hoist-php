@@ -49,154 +49,43 @@
             <!-- Profile Information -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <!-- Account Details -->
-                <div class="bg-white rounded-lg shadow-md border border-gray-200">
-                    <div class="px-6 py-4 border-b border-gray-200">
-                        <h3 class="text-lg font-semibold text-gray-900">Account Details</h3>
-                    </div>
-                    <div class="p-6">
-                        <dl class="space-y-4">
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500">Full Name</dt>
-                                <dd class="mt-1 text-sm text-gray-900"><?= htmlspecialchars($user['name']) ?></dd>
-                            </div>
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500">Email Address</dt>
-                                <dd class="mt-1 text-sm text-gray-900"><?= htmlspecialchars($user['email']) ?></dd>
-                            </div>
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500">User Role</dt>
-                                <dd class="mt-1">
-                                    <span
-                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <?= $user['user_group_id'] === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800' ?>">
-                                        <i
-                                            class="fas <?= $user['user_group_id'] === 'admin' ? 'fa-crown' : 'fa-user' ?> mr-1"></i>
-                                        <?= htmlspecialchars(ucfirst($user['user_group_id'])) ?>
-                                    </span>
-                                </dd>
-                            </div>
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500">Account Status</dt>
-                                <dd class="mt-1">
-                                    <span
-                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <?= $user['status'] === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' ?>">
-                                        <i
-                                            class="fas <?= $user['status'] === 'active' ? 'fa-check-circle' : 'fa-times-circle' ?> mr-1"></i>
-                                        <?= htmlspecialchars(ucfirst($user['status'])) ?>
-                                    </span>
-                                </dd>
-                            </div>
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500">Member Since</dt>
-                                <dd class="mt-1 text-sm text-gray-900">
-                                    <?= date('F j, Y', strtotime($user['created_at'])) ?>
-                                    <span
-                                        class="text-gray-500 text-xs">(<?= date('g:i A', strtotime($user['created_at'])) ?>)</span>
-                                </dd>
-                            </div>
-                        </dl>
-                    </div>
-                </div>
+                <?= $components->render('UI.Card', [
+                    'content' => $components->render('Layout.DefinitionList', [
+                        'items' => [
+                            ['label' => 'Full Name', 'value' => htmlspecialchars($user['name'])],
+                            ['label' => 'Email Address', 'value' => htmlspecialchars($user['email'])],
+                            ['label' => 'User Role', 'value' => $components->render('UI.Badge', ['text' => ucfirst($user['user_group_id']), 'icon' => $user['user_group_id'] === 'admin' ? 'fas fa-crown' : 'fas fa-user', 'color' => $user['user_group_id'] === 'admin' ? 'purple' : 'blue'])],
+                            ['label' => 'Account Status', 'value' => $components->render('UI.Badge', ['text' => ucfirst($user['status']), 'icon' => $user['status'] === 'active' ? 'fas fa-check-circle' : 'fas fa-times-circle', 'color' => $user['status'] === 'active' ? 'green' : 'red'])],
+                            ['label' => 'Member Since', 'value' => date('F j, Y', strtotime($user['created_at'])) . ' <span class="text-gray-500 text-xs">(' . date('g:i A', strtotime($user['created_at'])) . ')</span>']
+                        ]
+                    ]),
+                    'title' => 'Account Details'
+                ]) ?>
 
                 <!-- Security Information -->
-                <div class="bg-white rounded-lg shadow-md border border-gray-200">
-                    <div class="px-6 py-4 border-b border-gray-200">
-                        <h3 class="text-lg font-semibold text-gray-900">Security & Access</h3>
-                    </div>
-                    <div class="p-6">
-                        <div class="space-y-4">
-                            <!-- Password Security -->
-                            <div class="flex items-start space-x-3">
-                                <div class="flex-shrink-0">
-                                    <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                                        <i class="fas fa-lock text-green-600 text-sm"></i>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h4 class="text-sm font-medium text-gray-900">Password Protection</h4>
-                                    <p class="text-sm text-gray-600">Your password is securely hashed using modern
-                                        encryption</p>
-                                </div>
-                            </div>
-
-                            <!-- Session Security -->
-                            <div class="flex items-start space-x-3">
-                                <div class="flex-shrink-0">
-                                    <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                                        <i class="fas fa-shield-alt text-blue-600 text-sm"></i>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h4 class="text-sm font-medium text-gray-900">Session Management</h4>
-                                    <p class="text-sm text-gray-600">Secure session handling with automatic timeout</p>
-                                </div>
-                            </div>
-
-                            <!-- Data Validation -->
-                            <div class="flex items-start space-x-3">
-                                <div class="flex-shrink-0">
-                                    <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                                        <i class="fas fa-check-double text-purple-600 text-sm"></i>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h4 class="text-sm font-medium text-gray-900">Input Validation</h4>
-                                    <p class="text-sm text-gray-600">All user input is validated and sanitized for
-                                        security</p>
-                                </div>
-                            </div>
-
-                            <!-- Permissions -->
-                            <div class="flex items-start space-x-3">
-                                <div class="flex-shrink-0">
-                                    <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
-                                        <i class="fas fa-key text-yellow-600 text-sm"></i>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h4 class="text-sm font-medium text-gray-900">Access Control</h4>
-                                    <p class="text-sm text-gray-600">
-                                        <?php if ($user['user_group_id'] === 'admin'): ?>
-                                            Full administrative access to all system features
-                                        <?php else: ?>
-                                            Standard user access with role-based permissions
-                                        <?php endif; ?>
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <?= $components->render('UI.Card', [
+                    'content' => $components->render('Layout.FeatureList', [
+                        'features' => [
+                            ['title' => 'Password Protection', 'description' => 'Your password is securely hashed using modern encryption'],
+                            ['title' => 'Session Management', 'description' => 'Secure session handling with automatic timeout'],
+                            ['title' => 'Input Validation', 'description' => 'All user input is validated and sanitized for security'],
+                            ['title' => 'Access Control', 'description' => $user['user_group_id'] === 'admin' ? 'Full administrative access to all system features' : 'Standard user access with role-based permissions']
+                        ]
+                    ]),
+                    'title' => 'Security & Access'
+                ]) ?>
             </div>
 
             <!-- Account Actions -->
-            <div class="mt-8 bg-white rounded-lg shadow-md border border-gray-200">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <h3 class="text-lg font-semibold text-gray-900">Account Actions</h3>
-                </div>
-                <div class="p-6">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <?php if ($user['user_group_id'] === 'admin'): ?>
-                            <a href="/user/admin"
-                                class="flex items-center justify-center px-4 py-3 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-lg transition-colors duration-200 group">
-                                <i class="fas fa-cog text-purple-600 mr-2"></i>
-                                <span class="font-medium text-purple-700 group-hover:text-purple-800">Admin Panel</span>
-                            </a>
-                        <?php endif; ?>
-
-                        <a href="/user"
-                            class="flex items-center justify-center px-4 py-3 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg transition-colors duration-200 group">
-                            <i class="fas fa-tachometer-alt text-blue-600 mr-2"></i>
-                            <span class="font-medium text-blue-700 group-hover:text-blue-800">Dashboard</span>
-                        </a>
-
-                        <a href="/user/logout"
-                            class="flex items-center justify-center px-4 py-3 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg transition-colors duration-200 group">
-                            <i class="fas fa-sign-out-alt text-red-600 mr-2"></i>
-                            <span class="font-medium text-red-700 group-hover:text-red-800">Logout</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
+            <?= $components->render('UI.Card', [
+                'content' => '
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    ' . ($user['user_group_id'] === 'admin' ? $components->render('UI.ActionButton', ['href' => '/user/admin', 'text' => 'Admin Panel', 'icon' => 'fas fa-cog', 'color' => 'purple']) : '') . '
+                    ' . $components->render('UI.ActionButton', ['href' => '/user', 'text' => 'Dashboard', 'icon' => 'fas fa-tachometer-alt', 'color' => 'blue']) . '
+                    ' . $components->render('UI.ActionButton', ['href' => '/user/logout', 'text' => 'Logout', 'icon' => 'fas fa-sign-out-alt', 'color' => 'red']) . '
+                </div>',
+                'title' => 'Account Actions'
+            ]) ?>
 
             <!-- Framework Demo Note -->
             <div class="mt-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg shadow-lg">

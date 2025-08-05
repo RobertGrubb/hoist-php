@@ -302,6 +302,7 @@ class View
         $request = $this->instance->request;
         $view = $this;
         $auth = $this->instance->auth;
+        $components = $this->instance->components;
         $utilities = new Utilities();
 
         // Add each argument passed to the smarty variables.

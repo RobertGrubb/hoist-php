@@ -30,66 +30,31 @@
             <!-- Error Details -->
             <div class="px-6 py-6">
                 <?php if (isset($errorMessage) && $errorMessage): ?>
-                    <div class="mb-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Error Details</h3>
-                        <div class="bg-red-50 border border-red-200 rounded-lg p-4">
-                            <p class="text-red-800 text-sm leading-relaxed">
-                                <?= htmlspecialchars($errorMessage) ?>
-                            </p>
-                        </div>
-                    </div>
+                    <?= $components->render('UI.Alert', ['type' => 'error', 'messages' => [$errorMessage], 'title' => 'Error Details', 'dismissible' => false]) ?>
                 <?php endif; ?>
 
                 <!-- Common Error Types -->
                 <div class="mb-6">
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">What can you do?</h3>
-                    <div class="space-y-3">
-                        <div class="flex items-start space-x-3">
-                            <div class="flex-shrink-0">
-                                <div class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
-                                    <i class="fas fa-redo text-blue-600 text-xs"></i>
-                                </div>
-                            </div>
-                            <div>
-                                <h4 class="text-sm font-medium text-gray-900">Try Again</h4>
-                                <p class="text-sm text-gray-600">Refresh the page or try your request again</p>
-                            </div>
-                        </div>
-
-                        <div class="flex items-start space-x-3">
-                            <div class="flex-shrink-0">
-                                <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-                                    <i class="fas fa-home text-green-600 text-xs"></i>
-                                </div>
-                            </div>
-                            <div>
-                                <h4 class="text-sm font-medium text-gray-900">Go Home</h4>
-                                <p class="text-sm text-gray-600">Return to the main page and start over</p>
-                            </div>
-                        </div>
-
-                        <div class="flex items-start space-x-3">
-                            <div class="flex-shrink-0">
-                                <div class="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center">
-                                    <i class="fas fa-bug text-purple-600 text-xs"></i>
-                                </div>
-                            </div>
-                            <div>
-                                <h4 class="text-sm font-medium text-gray-900">Report Issue</h4>
-                                <p class="text-sm text-gray-600">If this persists, contact support with error details
-                                </p>
-                            </div>
-                        </div>
-                    </div>
+                    <?= $components->render('Layout.FeatureList', [
+                        'features' => [
+                            ['title' => 'Try Again', 'description' => 'Refresh the page or try your request again'],
+                            ['title' => 'Go Home', 'description' => 'Return to the main page and start over'],
+                            ['title' => 'Report Issue', 'description' => 'If this persists, contact support with error details']
+                        ]
+                    ]) ?>
                 </div>
 
                 <!-- Action Buttons -->
                 <div class="flex flex-col sm:flex-row gap-3">
-                    <button onclick="window.location.reload()"
-                        class="flex-1 inline-flex items-center justify-center px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white text-sm font-medium rounded-md transition-all duration-200 transform hover:scale-105 shadow-md">
-                        <i class="fas fa-redo mr-2"></i>
-                        Try Again
-                    </button>
+                    <?= $components->render('Form.Button', [
+                        'text' => 'Try Again',
+                        'icon' => 'fas fa-redo',
+                        'variant' => 'primary',
+                        'classes' => 'flex-1 transform hover:scale-105',
+                        'onclick' => 'window.location.reload()'
+                    ]) ?>
+
                     <a href="/"
                         class="flex-1 inline-flex items-center justify-center px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 text-sm font-medium rounded-md border border-gray-300 transition-colors duration-200 shadow-sm">
                         <i class="fas fa-home mr-2"></i>

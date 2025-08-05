@@ -92,6 +92,9 @@ class Instance
     /** @var Cache High-performance caching service */
     public $cache;
 
+    /** @var Components High-performance component rendering service */
+    public $components;
+
     // ===============================================================
     // APPLICATION STATE PROPERTIES
     // ===============================================================
@@ -101,9 +104,6 @@ class Instance
 
     /** @var object SEO meta data container for page titles, descriptions, etc. */
     public $meta;
-
-    /** @var bool Dark mode preference state */
-    public $darkMode;
 
     // ===============================================================
     // FRAMEWORK DEPENDENCIES
@@ -154,6 +154,7 @@ class Instance
         "View",
         "Cron",
         "Cache",
+        "Components"
     ];
 
     // ===============================================================
@@ -384,18 +385,12 @@ class Instance
             'path' => APPLICATION_DIRECTORY . '/Cache'
         ]);
 
-        // ---------------------------------------------------------------
-        // USER PREFERENCE SETUP
-        // ---------------------------------------------------------------
 
         /**
-         * Initialize user interface preferences.
-         * 
-         * Checks for user preferences stored in cookies, such as
-         * dark mode settings. Only applies to web requests.
+         * Initialize components system.
          */
         if (!$this->isCommandLine()) {
-            $this->darkMode = isset($_COOKIE['darkmode']) ? true : false;
+            $this->components = new Components($this);
         }
     }
 
@@ -628,39 +623,5 @@ class Instance
     public function isCommandLine()
     {
         return php_sapi_name() === "cli";
-    }
-
-    // ===============================================================
-    // USER PREFERENCE METHODS
-    // ===============================================================
-
-    /**
-     * Manages user dark mode preference setting.
-     * 
-     * Dark mode is a popular UI feature that:
-     * - Reduces eye strain in low-light conditions
-     * - Saves battery life on OLED displays
-     * - Provides modern, professional appearance
-     * - Improves accessibility for some users
-     * 
-     * This method:
-     * - Sets persistent cookie for preference storage
-     * - Updates current request state immediately
-     * - Handles both enabling and disabling dark mode
-     * 
-     * @param bool $val True to enable dark mode, false to disable
-     * @return void
-     */
-    public function setDarkMode($val)
-    {
-        if ($val == true) {
-            // Set cookie for 30 days
-            setcookie('darkmode', "true", time() + (86400 * 30), "/");
-            $_COOKIE['darkmode'] = $val;
-        } else {
-            // Remove dark mode preference
-            unset($_COOKIE['darkmode']);
-            setcookie('darkmode', '', -1, '/');
-        }
     }
 }

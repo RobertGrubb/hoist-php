@@ -8,9 +8,51 @@
         "avatar": null,
         "email_verified": 1,
         "status": "active",
-        "last_online": 1754406280,
+        "last_online": 1754412112,
         "deleted": 0,
         "created_at": "2025-08-04 22:30:00",
-        "updated_at": "2025-08-05 11:04:40"
+        "updated_at": "2025-08-05 12:41:52"
+    },
+    {
+        "id": 2,
+        "name": "John Doe",
+        "email": "john@example.com",
+        "password": "$2y$10$WkVKki8/S2hlRF9lUsqf6.v0EFCmxTNxv4C3vvDU5qwhaM73yWteG",
+        "user_group_id": "user",
+        "avatar": null,
+        "email_verified": 1,
+        "status": "active",
+        "last_online": 1754411887,
+        "deleted": 0,
+        "created_at": "2025-08-05 10:15:00",
+        "updated_at": "2025-08-05 10:15:00"
+    },
+    {
+        "id": 3,
+        "name": "Jane Smith",
+        "email": "jane@example.com",
+        "password": "$2y$10$WkVKki8/S2hlRF9lUsqf6.v0EFCmxTNxv4C3vvDU5qwhaM73yWteG",
+        "user_group_id": "user",
+        "avatar": null,
+        "email_verified": 1,
+        "status": "inactive",
+        "last_online": 1754411887,
+        "deleted": 0,
+        "created_at": "2025-08-05 09:30:00",
+        "updated_at": "2025-08-05 09:30:00"
+    },
+    {
+        "id": 4,
+        "name": "Bob Wilson",
+        "email": "bob@example.com",
+        "password": "$2y$10$WkVKki8/S2hlRF9lUsqf6.v0EFCmxTNxv4C3vvDU5qwhaM73yWteG",
+        "user_group_id": "admin",
+        "avatar": null,
+        "email_verified": 1,
+        "status": "active",
+        "last_online": 1754411887,
+        "deleted": 0,
+        "created_at": "2025-08-05 08:45:00",
+        "updated_at": "2025-08-05 08:45:00"
     }
 ]

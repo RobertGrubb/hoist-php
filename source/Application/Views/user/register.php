@@ -25,130 +25,77 @@
                 <div class="px-6 py-8">
                     <!-- Flash Messages -->
                     <?php if ($session->getFlashData('error')): ?>
-                        <div class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
-                            <div class="flex">
-                                <div class="flex-shrink-0">
-                                    <i class="fas fa-exclamation-circle text-red-400"></i>
-                                </div>
-                                <div class="ml-3">
-                                    <h3 class="text-sm font-medium text-red-800">Please fix the following errors:</h3>
-                                    <div class="mt-2 text-sm text-red-700">
-                                        <ul class="list-disc list-inside space-y-1">
-                                            <?php foreach ($session->getFlashData('error') as $error): ?>
-                                                <li><?= htmlspecialchars($error) ?></li>
-                                            <?php endforeach; ?>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <?= $components->render('UI.Alert', ['type' => 'error', 'messages' => $session->getFlashData('error'), 'title' => 'Please fix the following errors:']) ?>
                     <?php endif; ?>
 
                     <?php if ($session->getFlashData('success')): ?>
-                        <div class="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
-                            <div class="flex">
-                                <div class="flex-shrink-0">
-                                    <i class="fas fa-check-circle text-green-400"></i>
-                                </div>
-                                <div class="ml-3">
-                                    <?php foreach ($session->getFlashData('success') as $message): ?>
-                                        <p class="text-sm text-green-800"><?= htmlspecialchars($message) ?></p>
-                                    <?php endforeach; ?>
-                                </div>
-                            </div>
-                        </div>
+                        <?= $components->render('UI.Alert', ['type' => 'success', 'messages' => $session->getFlashData('success')]) ?>
                     <?php endif; ?>
 
                     <!-- Registration Form -->
                     <form method="POST" action="/user/register" class="space-y-6">
                         <!-- Full Name -->
-                        <div>
-                            <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-user text-gray-400 mr-2"></i>
-                                Full Name
-                            </label>
-                            <input type="text" id="name" name="name" required
-                                value="<?= htmlspecialchars($session->getFlashData('form_data')['name'] ?? '') ?>"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
-                                placeholder="Enter your full name">
-                        </div>
+                        <?= $components->render('Form.Input', [
+                            'type' => 'text',
+                            'name' => 'name',
+                            'label' => 'Full Name',
+                            'icon' => 'fas fa-user',
+                            'placeholder' => 'Enter your full name',
+                            'required' => true,
+                            'value' => $session->getFlashData('form_data')['name'] ?? ''
+                        ]) ?>
 
                         <!-- Email Address -->
-                        <div>
-                            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-envelope text-gray-400 mr-2"></i>
-                                Email Address
-                            </label>
-                            <input type="email" id="email" name="email" required
-                                value="<?= htmlspecialchars($session->getFlashData('form_data')['email'] ?? '') ?>"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
-                                placeholder="Enter your email address">
-                        </div>
+                        <?= $components->render('Form.Input', [
+                            'type' => 'email',
+                            'name' => 'email',
+                            'label' => 'Email Address',
+                            'icon' => 'fas fa-envelope',
+                            'placeholder' => 'Enter your email address',
+                            'required' => true,
+                            'value' => $session->getFlashData('form_data')['email'] ?? ''
+                        ]) ?>
 
                         <!-- Password -->
-                        <div>
-                            <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-lock text-gray-400 mr-2"></i>
-                                Password
-                            </label>
-                            <div class="relative">
-                                <input type="password" id="password" name="password" required
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200 pr-10"
-                                    placeholder="Create a secure password">
-                                <button type="button" class="absolute inset-y-0 right-0 pr-3 flex items-center"
-                                    onclick="togglePassword('password')">
-                                    <i class="fas fa-eye text-gray-400 hover:text-gray-600" id="password-icon"></i>
-                                </button>
-                            </div>
-                            <p class="mt-1 text-xs text-gray-500">
-                                Password must be at least 8 characters with letters and numbers
-                            </p>
-                        </div>
+                        <?= $components->render('Form.Input', [
+                            'type' => 'password',
+                            'name' => 'password',
+                            'label' => 'Password',
+                            'icon' => 'fas fa-lock',
+                            'placeholder' => 'Create a secure password',
+                            'required' => true,
+                            'help' => 'Password must be at least 8 characters with letters and numbers',
+                            'showToggle' => true
+                        ]) ?>
 
                         <!-- Confirm Password -->
-                        <div>
-                            <label for="password_confirm" class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-lock text-gray-400 mr-2"></i>
-                                Confirm Password
-                            </label>
-                            <div class="relative">
-                                <input type="password" id="password_confirm" name="password_confirm" required
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200 pr-10"
-                                    placeholder="Confirm your password">
-                                <button type="button" class="absolute inset-y-0 right-0 pr-3 flex items-center"
-                                    onclick="togglePassword('password_confirm')">
-                                    <i class="fas fa-eye text-gray-400 hover:text-gray-600"
-                                        id="password_confirm-icon"></i>
-                                </button>
-                            </div>
-                        </div>
+                        <?= $components->render('Form.Input', [
+                            'type' => 'password',
+                            'name' => 'password_confirm',
+                            'label' => 'Confirm Password',
+                            'icon' => 'fas fa-lock',
+                            'placeholder' => 'Confirm your password',
+                            'required' => true,
+                            'showToggle' => true
+                        ]) ?>
 
                         <!-- Terms and Conditions -->
-                        <div class="flex items-start">
-                            <div class="flex items-center h-5">
-                                <input id="terms" name="terms" type="checkbox" required
-                                    class="focus:ring-green-500 h-4 w-4 text-green-600 border-gray-300 rounded">
-                            </div>
-                            <div class="ml-3 text-sm">
-                                <label for="terms" class="text-gray-700">
-                                    I agree to the
-                                    <a href="#" class="text-green-600 hover:text-green-500 font-medium">Terms and
-                                        Conditions</a>
-                                    and
-                                    <a href="#" class="text-green-600 hover:text-green-500 font-medium">Privacy
-                                        Policy</a>
-                                </label>
-                            </div>
-                        </div>
+                        <?= $components->render('Form.Checkbox', [
+                            'name' => 'terms',
+                            'label' => 'I agree to the <a href="#" class="text-green-600 hover:text-green-500 font-medium">Terms and Conditions</a> and <a href="#" class="text-green-600 hover:text-green-500 font-medium">Privacy Policy</a>',
+                            'required' => true
+                        ]) ?>
 
                         <!-- Register Button -->
-                        <div>
-                            <button type="submit"
-                                class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200 transform hover:scale-105">
-                                <i class="fas fa-user-plus mr-2"></i>
-                                Create Account
-                            </button>
-                        </div>
+                        <?= $components->render('Form.Button', [
+                            'type' => 'submit',
+                            'text' => 'Create Account',
+                            'icon' => 'fas fa-user-plus',
+                            'variant' => 'primary',
+                            'size' => 'lg',
+                            'fullWidth' => true,
+                            'classes' => 'transform hover:scale-105'
+                        ]) ?>
                     </form>
 
                     <!-- Login Link -->

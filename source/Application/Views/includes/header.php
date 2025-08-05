@@ -59,4 +59,4 @@
     <?php endforeach; ?>
 </head>
 
-<body <?php if ($instance->darkMode): ?>class="dark" <?php endif; ?>>
+<body>

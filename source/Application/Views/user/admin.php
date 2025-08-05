@@ -54,272 +54,182 @@
 
             <!-- Stats Overview -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                <div class="bg-white rounded-lg shadow-md border border-gray-200 p-6">
-                    <div class="flex items-center">
-                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-users text-blue-600 text-xl"></i>
-                        </div>
-                        <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-500">Total Users</p>
-                            <p class="text-2xl font-semibold text-gray-900"><?= count($users) ?></p>
-                        </div>
-                    </div>
-                </div>
+                <?= $components->render('Layout.AdminStatCard', ['title' => 'Total Users', 'value' => count($users), 'icon' => 'fas fa-users', 'color' => 'blue']) ?>
 
-                <div class="bg-white rounded-lg shadow-md border border-gray-200 p-6">
-                    <div class="flex items-center">
-                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-user-check text-green-600 text-xl"></i>
-                        </div>
-                        <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-500">Active Users</p>
-                            <p class="text-2xl font-semibold text-gray-900">
-                                <?= count(array_filter($users, function ($user) {
-                                    return $user['status'] === 'active'; })) ?>
-                            </p>
-                        </div>
-                    </div>
-                </div>
+                <?= $components->render('Layout.AdminStatCard', [
+                    'title' => 'Active Users',
+                    'value' => count(array_filter($users, function ($user) {
+                                        return $user['status'] === 'active';
+                                    })),
+                    'icon' => 'fas fa-user-check',
+                    'color' => 'green'
+                ]) ?>
 
-                <div class="bg-white rounded-lg shadow-md border border-gray-200 p-6">
-                    <div class="flex items-center">
-                        <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-crown text-purple-600 text-xl"></i>
-                        </div>
-                        <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-500">Administrators</p>
-                            <p class="text-2xl font-semibold text-gray-900">
-                                <?= count(array_filter($users, function ($user) {
-                                    return $user['user_group_id'] === 'admin'; })) ?>
-                            </p>
-                        </div>
-                    </div>
-                </div>
+                <?= $components->render('Layout.AdminStatCard', [
+                    'title' => 'Administrators',
+                    'value' => count(array_filter($users, function ($user) {
+                        return $user['user_group_id'] === 'admin';
+                    })),
+                    'icon' => 'fas fa-crown',
+                    'color' => 'purple'
+                ]) ?>
 
-                <div class="bg-white rounded-lg shadow-md border border-gray-200 p-6">
-                    <div class="flex items-center">
-                        <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-clock text-yellow-600 text-xl"></i>
-                        </div>
-                        <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-500">New Today</p>
-                            <p class="text-2xl font-semibold text-gray-900">
-                                <?= count(array_filter($users, function ($user) {
-                                    return date('Y-m-d', strtotime($user['created_at'])) === date('Y-m-d');
-                                })) ?>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- User Management -->
-            <div class="bg-white rounded-lg shadow-md border border-gray-200">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-lg font-semibold text-gray-900">User Management</h3>
-                        <button
-                            class="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-md transition-colors duration-200">
-                            <i class="fas fa-plus mr-2"></i>
-                            Add New User
-                        </button>
-                    </div>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    User</th>
-                                <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Email</th>
-                                <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Role</th>
-                                <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Status</th>
-                                <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Created</th>
-                                <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            <?php foreach ($users as $user): ?>
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            <div
-                                                class="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
-                                                <i class="fas fa-user text-white text-sm"></i>
-                                            </div>
-                                            <div class="ml-4">
-                                                <div class="text-sm font-medium text-gray-900">
-                                                    <?= htmlspecialchars($user['name']) ?></div>
-                                                <div class="text-sm text-gray-500">ID: <?= htmlspecialchars($user['id']) ?>
-                                                </div>
-                                            </div>
+                <?= $components->render('Layout.AdminStatCard', [
+                    'title' => 'New Today',
+                    'value' => count(array_filter($users, function ($user) {
+                        return date('Y-m-d', strtotime($user['created_at'])) === date('Y-m-d');
+                    })),
+                    'icon' => 'fas fa-clock',
+                    'color' => 'yellow'
+                ]) ?>
+            </div> <!-- User Management -->
+            <?= $components->render('UI.Card', [
+                'content' => '
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-900">User Management</h3>
+                    ' . $components->render('Form.Button', [
+                                'text' => 'Add New User',
+                                'icon' => 'fas fa-plus',
+                                'variant' => 'primary',
+                                'classes' => 'bg-purple-600 hover:bg-purple-700',
+                                'onclick' => 'openModal(\'addUserModal\')'
+                            ]) . '
+                </div>',
+                'title' => '',
+                'footer' => '
+                ' . $components->render('Layout.DataTable', [
+                                'headers' => ['User', 'Email', 'Role', 'Status', 'Created'],
+                                'rows' => array_map(function ($user) use ($components) {
+                                return [
+                                    'data' => $user,
+                                    'cells' => [
+                                        '<div class="flex items-center">
+                                        <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+                                            <i class="fas fa-user text-white text-sm"></i>
                                         </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        <?= htmlspecialchars($user['email']) ?>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span
-                                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <?= $user['user_group_id'] === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800' ?>">
-                                            <i
-                                                class="fas <?= $user['user_group_id'] === 'admin' ? 'fa-crown' : 'fa-user' ?> mr-1"></i>
-                                            <?= htmlspecialchars(ucfirst($user['user_group_id'])) ?>
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span
-                                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <?= $user['status'] === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' ?>">
-                                            <i
-                                                class="fas <?= $user['status'] === 'active' ? 'fa-check-circle' : 'fa-times-circle' ?> mr-1"></i>
-                                            <?= htmlspecialchars(ucfirst($user['status'])) ?>
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        <?= date('M j, Y', strtotime($user['created_at'])) ?>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <div class="flex items-center space-x-2">
-                                            <button
-                                                class="text-indigo-600 hover:text-indigo-900 transition-colors duration-200"
-                                                title="View">
-                                                <i class="fas fa-eye"></i>
-                                            </button>
-                                            <button class="text-blue-600 hover:text-blue-900 transition-colors duration-200"
-                                                title="Edit">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                            <?php if ($user['id'] !== $currentUser['id']): ?>
-                                                <button class="text-red-600 hover:text-red-900 transition-colors duration-200"
-                                                    title="Delete">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            <?php endif; ?>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-gray-900">' . htmlspecialchars($user['name']) . '</div>
+                                            <div class="text-sm text-gray-500">ID: ' . htmlspecialchars($user['id']) . '</div>
                                         </div>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                                    </div>',
+                                        '<span class="text-sm text-gray-900">' . htmlspecialchars($user['email']) . '</span>',
+                                        $components->render('UI.Badge', ['text' => ucfirst($user['user_group_id']), 'icon' => $user['user_group_id'] === 'admin' ? 'fas fa-crown' : 'fas fa-user', 'color' => $user['user_group_id'] === 'admin' ? 'purple' : 'blue']),
+                                        $components->render('UI.Badge', ['text' => ucfirst($user['status']), 'icon' => $user['status'] === 'active' ? 'fas fa-check-circle' : 'fas fa-times-circle', 'color' => $user['status'] === 'active' ? 'green' : 'red']),
+                                        '<span class="text-sm text-gray-900">' . date('M j, Y', strtotime($user['created_at'])) . '</span>'
+                                    ]
+                                ];
+                            }, $users),
+                                'actions' => [
+                                    [
+                                        'icon' => 'fas fa-eye',
+                                        'class' => 'text-indigo-600 hover:text-indigo-900 transition-colors duration-200',
+                                        'title' => 'View',
+                                        'onclick' => 'openModal(\'viewUserModal\'); loadUserData(\'{id}\', \'{name}\', \'{email}\')'
+                                    ],
+                                    [
+                                        'icon' => 'fas fa-edit',
+                                        'class' => 'text-blue-600 hover:text-blue-900 transition-colors duration-200',
+                                        'title' => 'Edit',
+                                        'onclick' => 'openModal(\'editUserModal\'); loadEditUserData(\'{id}\', \'{name}\', \'{email}\')'
+                                    ],
+                                    [
+                                        'icon' => 'fas fa-trash',
+                                        'class' => 'text-red-600 hover:text-red-900 transition-colors duration-200',
+                                        'title' => 'Delete',
+                                        'onclick' => 'openConfirm(\'deleteUserConfirm\'); setDeleteUser(\'{id}\', \'{name}\')',
+                                        'condition' => function ($userData) use ($currentUser) {
+                                        return $userData['id'] !== $currentUser['id'];
+                                    }
+                                    ]
+                                ]
+                            ]) . '
+            '
+            ]) ?>
 
             <!-- System Information -->
             <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <!-- Framework Stats -->
-                <div class="bg-white rounded-lg shadow-md border border-gray-200">
-                    <div class="px-6 py-4 border-b border-gray-200">
-                        <h3 class="text-lg font-semibold text-gray-900">Framework Information</h3>
-                    </div>
-                    <div class="p-6">
-                        <dl class="space-y-4">
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500">Framework</dt>
-                                <dd class="mt-1 text-sm text-gray-900">Hoist PHP MVC Framework</dd>
-                            </div>
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500">Database Engine</dt>
-                                <dd class="mt-1 text-sm text-gray-900">FileDatabase (JSON Storage)</dd>
-                            </div>
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500">Authentication</dt>
-                                <dd class="mt-1 text-sm text-gray-900">Session-based with Role Management</dd>
-                            </div>
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500">Security Features</dt>
-                                <dd class="mt-1 text-sm text-gray-900">XSS Protection, Input Validation, Data Cleaning
-                                </dd>
-                            </div>
-                        </dl>
-                    </div>
-                </div>
+                <?= $components->render('UI.Card', [
+                    'content' => $components->render('Layout.DefinitionList', [
+                        'items' => [
+                            ['label' => 'Framework', 'value' => 'Hoist PHP MVC Framework'],
+                            ['label' => 'Database Engine', 'value' => 'FileDatabase (JSON Storage)'],
+                            ['label' => 'Authentication', 'value' => 'Session-based with Role Management'],
+                            ['label' => 'Security Features', 'value' => 'XSS Protection, Input Validation, Data Cleaning']
+                        ]
+                    ]),
+                    'title' => 'Framework Information'
+                ]) ?>
 
                 <!-- Recent Activity -->
-                <div class="bg-white rounded-lg shadow-md border border-gray-200">
-                    <div class="px-6 py-4 border-b border-gray-200">
-                        <h3 class="text-lg font-semibold text-gray-900">Recent Activity</h3>
-                    </div>
-                    <div class="p-6">
-                        <div class="flow-root">
-                            <ul class="-mb-8">
-                                <li>
-                                    <div class="relative pb-8">
-                                        <div class="relative flex space-x-3">
+                <?= $components->render('UI.Card', [
+                    'content' => '
+                    <div class="flow-root">
+                        <ul class="-mb-8">
+                            <li>
+                                <div class="relative pb-8">
+                                    <div class="relative flex space-x-3">
+                                        <div>
+                                            <span class="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center ring-8 ring-white">
+                                                <i class="fas fa-user-plus text-white text-xs"></i>
+                                            </span>
+                                        </div>
+                                        <div class="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
                                             <div>
-                                                <span
-                                                    class="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center ring-8 ring-white">
-                                                    <i class="fas fa-user-plus text-white text-xs"></i>
-                                                </span>
+                                                <p class="text-sm text-gray-500">New user registered</p>
+                                                <p class="text-xs text-gray-400">User management system active</p>
                                             </div>
-                                            <div class="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
-                                                <div>
-                                                    <p class="text-sm text-gray-500">New user registered</p>
-                                                    <p class="text-xs text-gray-400">User management system active</p>
-                                                </div>
-                                                <div class="text-right text-sm whitespace-nowrap text-gray-500">
-                                                    <time>Just now</time>
-                                                </div>
+                                            <div class="text-right text-sm whitespace-nowrap text-gray-500">
+                                                <time>Just now</time>
                                             </div>
                                         </div>
                                     </div>
-                                </li>
-                                <li>
-                                    <div class="relative pb-8">
-                                        <div class="relative flex space-x-3">
+                                </div>
+                            </li>
+                            <li>
+                                <div class="relative pb-8">
+                                    <div class="relative flex space-x-3">
+                                        <div>
+                                            <span class="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center ring-8 ring-white">
+                                                <i class="fas fa-shield-alt text-white text-xs"></i>
+                                            </span>
+                                        </div>
+                                        <div class="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
                                             <div>
-                                                <span
-                                                    class="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center ring-8 ring-white">
-                                                    <i class="fas fa-shield-alt text-white text-xs"></i>
-                                                </span>
+                                                <p class="text-sm text-gray-500">Security validation enabled</p>
+                                                <p class="text-xs text-gray-400">All inputs protected by enhanced validation</p>
                                             </div>
-                                            <div class="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
-                                                <div>
-                                                    <p class="text-sm text-gray-500">Security validation enabled</p>
-                                                    <p class="text-xs text-gray-400">All inputs protected by enhanced
-                                                        validation</p>
-                                                </div>
-                                                <div class="text-right text-sm whitespace-nowrap text-gray-500">
-                                                    <time>2 min ago</time>
-                                                </div>
+                                            <div class="text-right text-sm whitespace-nowrap text-gray-500">
+                                                <time>2 min ago</time>
                                             </div>
                                         </div>
                                     </div>
-                                </li>
-                                <li>
-                                    <div class="relative">
-                                        <div class="relative flex space-x-3">
+                                </div>
+                            </li>
+                            <li>
+                                <div class="relative">
+                                    <div class="relative flex space-x-3">
+                                        <div>
+                                            <span class="h-8 w-8 rounded-full bg-purple-500 flex items-center justify-center ring-8 ring-white">
+                                                <i class="fas fa-cog text-white text-xs"></i>
+                                            </span>
+                                        </div>
+                                        <div class="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
                                             <div>
-                                                <span
-                                                    class="h-8 w-8 rounded-full bg-purple-500 flex items-center justify-center ring-8 ring-white">
-                                                    <i class="fas fa-cog text-white text-xs"></i>
-                                                </span>
+                                                <p class="text-sm text-gray-500">Admin panel accessed</p>
+                                                <p class="text-xs text-gray-400">Full MVC demonstration active</p>
                                             </div>
-                                            <div class="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
-                                                <div>
-                                                    <p class="text-sm text-gray-500">Admin panel accessed</p>
-                                                    <p class="text-xs text-gray-400">Full MVC demonstration active</p>
-                                                </div>
-                                                <div class="text-right text-sm whitespace-nowrap text-gray-500">
-                                                    <time>5 min ago</time>
-                                                </div>
+                                            <div class="text-right text-sm whitespace-nowrap text-gray-500">
+                                                <time>5 min ago</time>
                                             </div>
                                         </div>
                                     </div>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>',
+                    'title' => 'Recent Activity'
+                ]) ?>
             </div>
 
             <!-- Framework Demo Note -->
@@ -345,6 +255,121 @@
             </div>
         </div>
     </div>
+
+    <!-- Add User Modal -->
+    <?= $components->render('UI.Modal', [
+        'id' => 'addUserModal',
+        'title' => 'Add New User',
+        'size' => 'lg',
+        'content' => '
+            <form id="addUserForm" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    ' . $components->render('Form.Input', [
+                        'type' => 'text',
+                        'name' => 'name',
+                        'label' => 'Full Name',
+                        'placeholder' => 'Enter full name',
+                        'required' => true
+                    ]) . '
+                    
+                    ' . $components->render('Form.Input', [
+                        'type' => 'email',
+                        'name' => 'email',
+                        'label' => 'Email Address',
+                        'placeholder' => 'Enter email address',
+                        'required' => true
+                    ]) . '
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    ' . $components->render('Form.Input', [
+                        'type' => 'password',
+                        'name' => 'password',
+                        'label' => 'Password',
+                        'placeholder' => 'Enter password',
+                        'required' => true
+                    ]) . '
+                    
+                    ' . $components->render('Form.Select', [
+                        'name' => 'user_group_id',
+                        'label' => 'User Role',
+                        'options' => [
+                            'user' => 'User',
+                            'admin' => 'Administrator'
+                        ],
+                        'required' => true
+                    ]) . '
+                </div>
+                
+                ' . $components->render('Form.Checkbox', [
+                        'name' => 'status',
+                        'label' => 'Active User',
+                        'description' => 'Allow this user to sign in',
+                        'checked' => true
+                    ]) . '
+            </form>',
+        'footer' =>
+            $components->render('Form.Button', [
+                'text' => 'Create User',
+                'variant' => 'primary',
+                'onclick' => 'handleAddUser()'
+            ]) . ' ' .
+            $components->render('Form.Button', [
+                'text' => 'Cancel',
+                'variant' => 'secondary',
+                'onclick' => 'closeModal(\'addUserModal\')'
+            ])
+    ]) ?>
+
+    <!-- Delete User Confirmation -->
+    <?= $components->render('UI.Confirmation', [
+        'id' => 'deleteUserConfirm',
+        'title' => 'Delete User',
+        'message' => 'Are you sure you want to delete this user? This action cannot be undone.',
+        'variant' => 'danger',
+        'confirmText' => 'Delete User',
+        'confirmAction' => 'handleDeleteUser()',
+        'icon' => 'fas fa-user-times'
+    ]) ?>
+
+    <script>
+        let currentDeleteUser = null;
+
+        function setDeleteUser(userId, userName) {
+            currentDeleteUser = { id: userId, name: userName };
+            // Update confirmation message
+            document.querySelector("#deleteUserConfirm p").textContent =
+                `Are you sure you want to delete "${userName}"? This action cannot be undone.`;
+        }
+
+        function handleDeleteUser() {
+            if (currentDeleteUser) {
+                // Here you would typically make an AJAX call to delete the user
+                alert(`User "${currentDeleteUser.name}" would be deleted (ID: ${currentDeleteUser.id})`);
+                // Reset
+                currentDeleteUser = null;
+            }
+        }
+
+        function handleAddUser() {
+            // Here you would typically validate and submit the form via AJAX
+            const formData = new FormData(document.getElementById("addUserForm"));
+            const userData = Object.fromEntries(formData);
+
+            alert("New user would be created with data: " + JSON.stringify(userData));
+            closeModal("addUserModal");
+        }
+
+        function loadUserData(id, name, email) {
+            // This would load user data for viewing
+            console.log("Loading user data:", { id, name, email });
+        }
+
+        function loadEditUserData(id, name, email) {
+            // This would load user data for editing
+            console.log("Loading edit user data:", { id, name, email });
+        }
+    </script>
 </main>
 
 <?= $view->render('includes/footer'); ?>
