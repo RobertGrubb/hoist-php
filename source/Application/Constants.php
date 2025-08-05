@@ -1,5 +1,16 @@
 <?php
 
+/**
+ * =================================================================
+ * HOIST PHP FRAMEWORK - CONSTANTS
+ * =================================================================
+ * 
+ * Application constants configuration file. Define any constants
+ * that should be globally accessible throughout the application.
+ * 
+ * Example: define("CONSTANT_NAME", "value");
+ */
+
 defined("APPLICATION_VERSION") || define("APPLICATION_VERSION", "0.0.1");
 
 /**
@@ -14,7 +25,7 @@ defined("APPLICATION_STYLESHEETS") || define("APPLICATION_STYLESHEETS", [
 ]);
 
 /**
- * ================================s===
+ * ===================================
  * Application Scripts
  * ===================================
  */

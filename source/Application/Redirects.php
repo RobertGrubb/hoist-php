@@ -1,13 +1,14 @@
 <?php
 
 /**
- * You can add redirects here
- *
- * Example: '/admin/dashboard' => '/admin/dashboard2'
+ * =================================================================
+ * HOIST PHP FRAMEWORK - REDIRECTIONS
+ * =================================================================
  * 
- * Use case could be a page has changed locations and you want to redirect
- * the old url to the new destination.
+ * Application redirection configuration. Add any URL redirects here.
+ * 
+ * Example: '/old-path' => '/new-path'
  */
 return [
-    
+
 ];
