@@ -24,21 +24,6 @@ A lightweight, modern PHP MVC framework designed for rapid development with opti
 
 ---
 
-## 📚 **[Complete Documentation](docs/README.md)**
-
-**Looking for comprehensive guides and examples?** Check out our detailed documentation:
-
--   🚀 **[Quick Start Guide](docs/getting-started/quickstart.md)** - Get running in under 5 minutes
--   📖 **[Core Concepts](docs/core/concepts.md)** - Deep dive into framework architecture
--   🎯 **[Request Handling](docs/components/request.md)** - Modern HTTP request processing
--   📊 **[Database & Storage](docs/database/storage.md)** - FileDatabase and SQL usage
--   🔧 **[Developer Tools](docs/tools/development.md)** - CLI tools, debugging, and testing
--   📝 **[Examples](docs/examples/)** - Real-world application tutorials
-
-The documentation includes interactive demos, code examples, and comprehensive API references for building production-ready applications.
-
----
-
 ## What is Hoist PHP?
 
 Hoist is a **lightweight, convention-over-configuration PHP MVC framework** that prioritizes developer productivity and deployment simplicity. Built for modern PHP applications, it provides a clean architecture with minimal boilerplate while offering the flexibility to scale from simple websites to complex web applications.
