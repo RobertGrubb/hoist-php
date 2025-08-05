@@ -97,8 +97,7 @@ Create an interactive user interface in minutes:
 ```php
 // In any controller
 $this->instance->view->render('dashboard', [
-    'users' => $users,
-    'components' => $this->instance->components
+    'users' => $users
 ]);
 ```
 
