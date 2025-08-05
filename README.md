@@ -459,19 +459,6 @@ MIT License - build amazing things with Hoist!
 
 ---
 
-## 🌟 **What Developers Say**
-
-> _"Hoist gets out of my way and lets me build. The component system is a game-changer."_  
-> **- Sarah, Full-Stack Developer**
-
-> _"From zero to production admin panel in under an hour. This is what PHP frameworks should be."_  
-> **- Mike, Startup CTO**
-
-> _"Finally, a framework that includes beautiful UI components out of the box."_  
-> **- Jessica, Frontend Developer**
-
----
-
 ## 🚀 **Get Started Today**
 
 ```bash
