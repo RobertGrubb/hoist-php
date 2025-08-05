@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.0/phpunit.xsd" bootstrap="tests/bootstrap.php" colors="true" cacheDirectory=".phpunit.cache" testdox="true">
+	<testsuites>
+		<testsuite name="Core Framework Tests">
+			<directory>
+				tests/Core
+			</directory>
+		</testsuite>
+		<testsuite name="Authentication Tests">
+			<directory>
+				tests/Security
+			</directory>
+		</testsuite>
+	</testsuites>
+	<source>
+		<include>
+			<directory>
+				Application
+			</directory>
+			<directory>
+				Core
+			</directory>
+		</include>
+		<exclude>
+			<directory>
+				Application/Database
+			</directory>
+			<directory>
+				Application/Cache
+			</directory>
+		</exclude>
+	</source>
+</phpunit>

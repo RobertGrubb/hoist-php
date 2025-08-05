@@ -11,6 +11,15 @@
         "nyholm/psr7": "^1.8",
         "consoletvs/profanity": "^3.5"
     },
+    "require-dev": {
+        "phpunit/phpunit": "^10.0"
+    },
+    "scripts": {
+        "test": "phpunit tests/",
+        "test-security": "phpunit tests/Security/",
+        "test-components": "phpunit tests/Components/",
+        "test-integration": "phpunit tests/Integration/"
+    },
     "config": {
         "allow-plugins": {
             "php-http/discovery": true

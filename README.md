@@ -426,6 +426,47 @@ chmod -R 755 Application/Database/
 
 ---
 
+## 📚 **Complete API Documentation**
+
+Hoist includes **comprehensive API documentation** for all framework components:
+
+### 🔗 **Core Framework APIs**
+
+-   **[Authentication API](docs/api/Authentication.md)** - User authentication, sessions, and role-based access
+-   **[Database API](docs/api/Database.md)** - MySQL and FileDatabase operations with query building
+-   **[Model API](docs/api/Model.md)** - Active Record pattern with security features and validation
+-   **[Request API](docs/api/Request.md)** - HTTP request handling, data validation, and file uploads
+-   **[Response API](docs/api/Response.md)** - JSON responses, redirects, and content delivery
+-   **[Router API](docs/api/Router.md)** - URL routing, parameter extraction, and nested controllers
+
+### 🎨 **UI and Presentation**
+
+-   **[View API](docs/api/View.md)** - Template rendering, component integration, and data passing
+-   **[Controller API](docs/api/Controller.md)** - Base controller functionality and MVC patterns
+
+### 🛡️ **Security and Validation**
+
+-   **[Security API](docs/api/Security.md)** - CSRF protection, form security, and request validation
+-   **[Validation API](docs/api/Validation.md)** - Input validation with 50+ rules and custom messages
+-   **[Session API](docs/api/Session.md)** - Session management, flash data, and state persistence
+
+### ⚡ **Performance and Utilities**
+
+-   **[Cache API](docs/api/Cache.md)** - Multi-driver caching with Redis, Memcached, and file support
+-   **[Utilities API](docs/api/Utilities.md)** - Helper functions for UUIDs, HTTP requests, and data processing
+
+### 📖 **Documentation Features**
+
+-   ✅ **Complete method documentation** with parameters and return types
+-   ✅ **Real-world examples** for every API method
+-   ✅ **Security best practices** and implementation guidelines
+-   ✅ **Framework integration** patterns and advanced usage
+-   ✅ **Enterprise-grade standards** with comprehensive coverage
+
+**[📚 Browse All API Documentation →](docs/api/README.md)**
+
+---
+
 ## 🤝 **Contributing**
 
 We welcome contributions! Hoist is built by developers, for developers.
