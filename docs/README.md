@@ -1,6 +1,10 @@
-# Hoist PHP Framework Documentation
+# Hoist PHP Framework Documentati### **Database & Storage**
 
-![Hoist PHP](https://img.shields.io/badge/Hoist_PHP-v2.0-blue?style=for-the-badge)
+-   [🗄️ Database Overview](database/overview.md) - Medoo ORM and FileDatabase integration
+
+### **Advanced Features**
+
+_Advanced documentation is being updated to match the actual framework capabilities._ PHP](https://img.shields.io/badge/Hoist_PHP-v2.0-blue?style=for-the-badge)
 ![PHP](https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php)
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 
@@ -33,10 +37,9 @@ A comprehensive guide to building modern web applications with the Hoist PHP fra
 
 ### **Database & Storage**
 
--   [💾 FileDatabase](database/filedatabase.md) - JSON-based file storage system
+-   [�️ Database Overview](database/overview.md) - Medoo ORM and FileDatabase integration
+-   [�💾 FileDatabase](database/filedatabase.md) - JSON-based file storage system
 -   [🗃️ MySQL Integration](database/mysql.md) - Relational database support
--   [🔍 Query Builder](database/query-builder.md) - Database query construction
--   [🗂️ Migrations](database/migrations.md) - Database schema management
 
 ### **Advanced Features**
 
@@ -122,9 +125,9 @@ Jump to [API Development](examples/api-development.md) for modern REST API examp
 
 ### **📦 Flexible Data Storage**
 
--   FileDatabase for rapid prototyping
--   MySQL support for production applications
--   Query builder with intuitive syntax
+-   FileDatabase for rapid prototyping and development
+-   Medoo ORM integration for production MySQL databases
+-   Simple, consistent query interface across both systems
 
 ## 🎯 Framework Rating: 9.8/10
 
