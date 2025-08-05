@@ -5,7 +5,9 @@ A lightweight, modern PHP MVC framework designed for rapid development with **ze
 ![PHP Version](https://img.shields.io/badge/PHP-%3E%3D8.1-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Framework](https://img.shields.io/badge/Framework-MVC-orange)
-![Components](https://img.shi## 📚 **Complete API Documentation**
+![Components](https://img.shields.io/badge/UI-Components-purple)
+
+### 📚 **Complete API Documentation**
 
 Hoist includes **comprehensive API documentation** for all framework components:
 
