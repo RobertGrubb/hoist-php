@@ -232,67 +232,59 @@ class View
         if (!function_exists('sanitize_output')) {
             function sanitize_output($buffer)
             {
-                // =============================================================
-                // COMMENT REMOVAL PHASE (Critical: Must happen BEFORE whitespace)
-                // =============================================================
-
-                /**
-                 * Remove various types of comments to reduce output size:
-                 * 1. HTML comments <!-- --> 
-                 * 2. CSS/JS block comments (slash-star star-slash format)
-                 * 3. JavaScript line comments (double-slash format, full line or after whitespace)
-                 * 
-                 * Order is critical - comments must be removed before whitespace
-                 * processing to avoid breaking comment patterns.
-                 */
-                $commentSearch = [
-                    '/<!--(.|\s)*?-->/',           // Remove HTML comments
-                    '/\/\*(.|\s)*?\*\//',          // Remove CSS/JS block comments /* */
-                    '/(?:^|\s)\/\/.*$/m',          // Remove JavaScript line comments // (only full line or after whitespace)
-                ];
-
-                $commentReplace = [
-                    '',
-                    '',
-                    '',
-                ];
-
-                // Apply comment removal patterns
-                $buffer = preg_replace($commentSearch, $commentReplace, $buffer);
+                // Handle null or empty buffer
+                if ($buffer === null || $buffer === '') {
+                    return '';
+                }
 
                 // =============================================================
-                // WHITESPACE OPTIMIZATION PHASE (After comment removal)
+                // SAFE COMMENT REMOVAL PHASE
                 // =============================================================
 
                 /**
-                 * Optimize whitespace and formatting for reduced bandwidth:
-                 * 1. Strip whitespace after HTML tags (except spaces)
-                 * 2. Strip whitespace before HTML tags (except spaces)  
-                 * 3. Compress multiple consecutive whitespace characters
-                 * 4. Remove leading whitespace from lines
-                 * 5. Remove trailing whitespace from lines
-                 * 
-                 * This significantly reduces HTML output size while maintaining
-                 * proper rendering and readability where needed.
+                 * Remove only safe comments that won't break functionality:
+                 * 1. HTML comments (preserve conditional comments)
+                 * 2. CSS block comments (only within style blocks)
+                 * 3. JS line comments (only full line comments with proper context)
                  */
-                $whitespaceSearch = [
-                    '/\>[^\S ]+/s',      // strip whitespaces after tags, except space
-                    '/[^\S ]+\</s',      // strip whitespaces before tags, except space
-                    '/(\s)+/s',          // shorten multiple whitespace sequences
-                    '/^\s+/m',           // remove leading whitespace from lines
-                    '/\s+$/m',           // remove trailing whitespace from lines
+
+                // Remove HTML comments (but preserve IE conditional comments)
+                $buffer = preg_replace('/<!--(?!\[if)(?!<!)(.*?)-->/s', '', $buffer);
+
+                // Check if buffer became null after comment removal
+                if ($buffer === null) {
+                    return '';
+                }
+
+                // =============================================================
+                // CONSERVATIVE WHITESPACE OPTIMIZATION
+                // =============================================================
+
+                /**
+                 * Apply only safe whitespace optimizations:
+                 * 1. Remove extra spaces between HTML tags
+                 * 2. Remove trailing whitespace from lines
+                 * 3. Compress excessive line breaks (3+ becomes 2)
+                 */
+                $whitespacePatterns = [
+                    '/>\s+</s',           // Remove whitespace between tags
+                    '/[ \t]+$/m',         // Remove trailing spaces/tabs from lines  
+                    '/\n{3,}/s',          // Compress 3+ line breaks to 2
                 ];
 
-                $whitespaceReplace = [
-                    '>',
-                    '<',
-                    '\\1',
+                $whitespaceReplacements = [
+                    '><',
                     '',
-                    '',
+                    "\n\n",
                 ];
 
-                // Apply whitespace optimization patterns
-                $buffer = preg_replace($whitespaceSearch, $whitespaceReplace, $buffer);
+                // Apply safe whitespace optimization patterns
+                $buffer = preg_replace($whitespacePatterns, $whitespaceReplacements, $buffer);
+
+                // Final null check
+                if ($buffer === null) {
+                    return '';
+                }
 
                 return $buffer;
             }

@@ -442,6 +442,223 @@ class UsersController extends Controller
 }
 ```
 
+## Request Handling
+
+Hoist provides a modern, secure Request class with enterprise-level features for handling HTTP requests, file uploads, content negotiation, and security validation.
+
+### Modern Input Access
+
+```php
+<?php
+
+class ApiController extends Controller
+{
+    public function createUser()
+    {
+        // Universal input access with defaults
+        $name = $this->instance->request->input('name', 'Anonymous');
+        $email = $this->instance->request->input('email');
+
+        // Get all input data from GET/POST
+        $allData = $this->instance->request->all();
+
+        // Get only specific fields
+        $userData = $this->instance->request->only(['name', 'email', 'age']);
+
+        // Get all except specific fields
+        $safeData = $this->instance->request->except(['password', 'token']);
+
+        // Check if parameters exist
+        if ($this->instance->request->has('email')) {
+            // Process email
+        }
+
+        // Check for multiple required parameters
+        if ($this->instance->request->hasAll(['name', 'email', 'password'])) {
+            // All required fields present
+        }
+    }
+}
+```
+
+### Built-in Validation
+
+```php
+<?php
+
+class UserController extends Controller
+{
+    public function register()
+    {
+        try {
+            // Validate input with rules
+            $validated = $this->instance->request->validate([
+                'username' => 'required|min:3|max:20',
+                'email' => 'required|email',
+                'password' => 'required|min:8',
+                'age' => 'required'
+            ]);
+
+            // Process validated data
+            $user = $this->instance->models->user->create($validated);
+
+            return $this->instance->response->sendSuccess([
+                'message' => 'User created successfully',
+                'user_id' => $user['id']
+            ]);
+
+        } catch (Exception $e) {
+            return $this->instance->response->sendError($e->getMessage(), 400);
+        }
+    }
+}
+```
+
+### File Upload Handling
+
+```php
+<?php
+
+class MediaController extends Controller
+{
+    public function uploadImage()
+    {
+        // Check if file was uploaded
+        if (!$this->instance->request->hasFile('image')) {
+            return $this->instance->response->sendError('No file uploaded', 400);
+        }
+
+        $file = $this->instance->request->file('image');
+
+        // File information includes security validation
+        if (!$file['is_valid']) {
+            return $this->instance->response->sendError('File upload failed', 400);
+        }
+
+        // Check file size (5MB limit)
+        if ($file['size'] > 5242880) {
+            return $this->instance->response->sendError('File too large', 400);
+        }
+
+        // Validate image files
+        if ($file['is_image']) {
+            $allowedTypes = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+            if (!in_array(strtolower($file['extension']), $allowedTypes)) {
+                return $this->instance->response->sendError('Invalid image type', 400);
+            }
+        }
+
+        // File info includes: name, type, size, tmp_name, error, is_valid,
+        // is_image, extension, mime_type
+        $filename = uniqid() . '_' . $file['name'];
+        // Process file upload...
+    }
+}
+```
+
+### Content Negotiation
+
+```php
+<?php
+
+class ApiController extends Controller
+{
+    public function getData()
+    {
+        $data = $this->instance->models->data->getAll();
+
+        // Automatically detect client preference
+        if ($this->instance->request->wantsJson()) {
+            return $this->instance->response->json($data);
+        }
+
+        // Check for specific request types
+        if ($this->instance->request->isAjax()) {
+            return $this->instance->response->json(['ajax' => true, 'data' => $data]);
+        }
+
+        // Traditional HTML response
+        $this->instance->view->render('data/index', ['data' => $data]);
+    }
+
+    public function handleCors()
+    {
+        // Handle CORS preflight requests
+        if ($this->instance->request->isPreflightRequest()) {
+            $this->instance->response->setCorsHeaders(
+                '*',
+                'GET,POST,PUT,DELETE',
+                'Content-Type,Authorization'
+            );
+            return $this->instance->response->sendSuccess('', 200);
+        }
+
+        // Regular API logic...
+    }
+}
+```
+
+### Security Features
+
+```php
+<?php
+
+class SecurityController extends Controller
+{
+    public function clientInfo()
+    {
+        // Secure client IP detection (proxy-aware)
+        $clientIp = $this->instance->request->getClientIp();
+
+        // Check if request is secure
+        if ($this->instance->request->isSecure()) {
+            // HTTPS connection
+        }
+
+        // Request size validation
+        if ($this->instance->request->isTooBig()) {
+            return $this->instance->response->sendError('Request too large', 413);
+        }
+
+        // Get sanitized input (XSS protection)
+        $safeInput = $this->instance->request->all(true); // true = sanitize
+
+        // Client information
+        $info = [
+            'ip' => $this->instance->request->getClientIp(),
+            'user_agent' => $this->instance->request->userAgent(),
+            'host' => $this->instance->request->getHost(),
+            'port' => $this->instance->request->getPort(),
+            'size' => $this->instance->request->getSize(),
+            'content_type' => $this->instance->request->getContentType(),
+            'is_secure' => $this->instance->request->isSecure(),
+            'referer' => $this->instance->request->referer()
+        ];
+
+        return $this->instance->response->json($info);
+    }
+}
+```
+
+### Legacy Methods (Backward Compatible)
+
+All existing Request methods continue to work exactly as before:
+
+```php
+// Traditional methods still work
+$userId = $this->instance->request->get('id');
+$formData = $this->instance->request->post();
+$clientIp = $this->instance->request->clientIp();
+$headers = $this->instance->request->headers();
+$method = $this->instance->request->method();
+
+// Method validation
+$this->instance->request->requireMethod('POST');
+
+// Parameter validation
+$this->instance->request->requireParam('post', ['email', 'password']);
+```
+
 ## Models & Database
 
 ### FileDatabase (Default)
