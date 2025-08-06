@@ -619,7 +619,7 @@ cd hoist-php
 docker-compose up -d
 ```
 
-**Open http://localhost:8080 and start building the future! 🌟**
+**Open http://localhost and start building the future! 🌟**
 
 ---
 
