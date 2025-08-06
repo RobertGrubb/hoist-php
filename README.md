@@ -11,6 +11,10 @@ A lightweight, modern PHP MVC framework designed for rapid development with **ze
 
 Hoist includes **comprehensive API documentation** for all framework components:
 
+### 🎯 **Command Line Interface**
+
+-   **[CLI Tool Documentation](docs/cli/README.md)** - Revolutionary database migration, code generation, and development tools
+
 ### 💾 **Primary Storage System**
 
 -   **[FileDatabase API](docs/api/FileDatabase.md)** - Zero-configuration JSON database with SQL-like queries (default storage)
@@ -55,6 +59,37 @@ Hoist isn't just another PHP framework - it's a **complete development ecosystem
 -   **Automatic Component Loading**: Render components with simple syntax
 -   **FileDatabase System**: Start building without database setup
 -   **Docker Container**: Single command deployment
+-   **🎯 CLI Migration Tool**: One-command FileDatabase → MySQL conversion
+
+### 💫 **Revolutionary Database Migration**
+
+**The feature that changes everything!** Hoist's CLI tool enables instant migration from development to production:
+
+```bash
+# 1. Develop with FileDatabase (0 setup time)
+# Build your entire MVP with JSON-based storage
+
+# 2. Scale to MySQL (1 command)
+php hoist migrate:to-mysql --database=myapp
+
+# 3. Production ready!
+# Same code, production database
+```
+
+**What the migration does:**
+
+-   ✅ **Discovers all tables** automatically from FileDatabase
+-   ✅ **Analyzes data types** from existing records
+-   ✅ **Generates MySQL schemas** with proper column types
+-   ✅ **Migrates all data** preserving relationships
+-   ✅ **Zero downtime** - works with live applications
+
+**This eliminates the development bottleneck:**
+
+-   No more "database setup before coding"
+-   No more "different storage for dev vs prod"
+-   No more complex migration scripts
+-   **Start coding immediately, scale when ready!**
 
 ### 🏗️ **Modern MVC Architecture**
 
@@ -110,6 +145,55 @@ docker-compose up -d
 ```
 
 **That's it!** Open http://localhost:8080 and start building.
+
+### 🎯 **GAME-CHANGING CLI Tool**
+
+Hoist includes a powerful CLI tool that revolutionizes the development-to-production workflow:
+
+**[📚 Complete CLI Documentation →](docs/cli/README.md)**
+
+#### **⚡ Zero-to-Production Migration**
+
+The most **innovative feature** - seamlessly migrate from FileDatabase to MySQL:
+
+```bash
+# Start with FileDatabase (zero setup)
+# Build your entire MVP with file-based storage
+
+# When ready for production, ONE COMMAND:
+php hoist migrate:to-mysql --database=myapp --user=root --password=secret
+
+# ✅ Automatically converts ALL your data
+# ✅ Generates proper MySQL schemas
+# ✅ Preserves all relationships
+# ✅ Zero downtime migration
+```
+
+**This solves the classic development dilemma:**
+
+-   🎯 **Development:** FileDatabase (instant setup, zero configuration)
+-   🚀 **Production:** MySQL (scalable, production-ready)
+-   ✨ **Migration:** One command transition!
+
+#### **🛠️ Development Tools**
+
+```bash
+# Generate code scaffolding
+php hoist generate:controller UserController
+php hoist generate:model User
+php hoist generate:component Form.CustomInput
+
+# Development server
+php hoist serve --port=8080
+
+# Clear cache
+php hoist cache:clear
+
+# See all commands
+php hoist --help
+```
+
+**[📖 View Complete CLI Reference →](docs/cli/README.md)**
 
 ### Your First Component
 
@@ -483,12 +567,14 @@ Hoist includes **comprehensive API documentation** for all framework components:
 ### 📖 **Documentation Features**
 
 -   ✅ **Complete method documentation** with parameters and return types
--   ✅ **Real-world examples** for every API method
+-   ✅ **Real-world examples** for every API method and CLI command
 -   ✅ **Security best practices** and implementation guidelines
 -   ✅ **Framework integration** patterns and advanced usage
 -   ✅ **Enterprise-grade standards** with comprehensive coverage
+-   ✅ **Revolutionary CLI tool** with migration and code generation guides
 
-**[📚 Browse All API Documentation →](docs/api/README.md)**
+**[📚 Browse All API Documentation →](docs/api/README.md)**  
+**[🎯 View CLI Tool Documentation →](docs/cli/README.md)**
 
 ---
 

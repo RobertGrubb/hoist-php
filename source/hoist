@@ -1,0 +1,659 @@
+#!/usr/bin/env php
+<?php
+
+/**
+ * ===============================================================
+ * HOIST PHP FRAMEWORK - CLI ENTRY POINT
+ * ===============================================================
+ * 
+ * 🚀 The magical command that changes everything:
+ *    php hoist migrate:to-mysql --database=myapp
+ * 
+ * This simple command transforms your FileDatabase MVP 
+ * into a production-ready MySQL application!
+ * 
+ * USAGE:
+ * php hoist [command] [options]
+ * 
+ * GAME-CHANGING COMMANDS:
+ * php hoist migrate:to-mysql --database=myapp --user=root --password=secret
+ * php hoist generate:controller UserController
+ * php hoist serve --port=8080
+ * 
+ * @package HoistPHP\CLI
+ * @author  Hoist PHP Framework Team
+ * @version 1.0.0
+ */
+
+// Ensure we're running from CLI
+if (php_sapi_name() !== 'cli') {
+    echo "❌ This tool must be run from the command line.\n";
+    exit(1);
+}
+
+// Define framework paths
+define('ROOT_DIRECTORY', dirname(__FILE__));
+define('SOURCE_DIRECTORY', ROOT_DIRECTORY);
+define('APPLICATION_DIRECTORY', ROOT_DIRECTORY . '/Application');
+define('CORE_DIRECTORY', ROOT_DIRECTORY . '/Core');
+define('PUBLIC_DIRECTORY', ROOT_DIRECTORY . '/public');
+define('WEB_DIRECTORY', ROOT_DIRECTORY . '/public');
+define('TEST_DIRECTORY', ROOT_DIRECTORY . '/tests');
+
+// Load required classes
+require_once CORE_DIRECTORY . '/Instance.php';
+require_once CORE_DIRECTORY . '/CLI/DatabaseMigrator.php';
+
+// Simple CodeGenerator stub for now
+class CodeGenerator
+{
+    private $instance;
+
+    public function __construct($instance)
+    {
+        $this->instance = $instance;
+    }
+
+    public function createController($name)
+    {
+        return $this->generateController($name);
+    }
+
+    public function createModel($name)
+    {
+        return $this->generateModel($name);
+    }
+
+    public function createComponent($name)
+    {
+        return $this->generateComponent($name);
+    }
+
+    /**
+     * 🎮 GENERATE CONTROLLER
+     */
+    private function generateController($name)
+    {
+        try {
+            // Ensure proper naming convention
+            $controllerName = $this->formatClassName($name, 'Controller');
+            $fileName = $controllerName . '.php';
+            $filePath = APPLICATION_DIRECTORY . '/Controllers/' . $fileName;
+
+            // Check if file already exists
+            if (file_exists($filePath)) {
+                return ['success' => false, 'error' => "Controller {$controllerName} already exists!"];
+            }
+
+            // Generate controller template
+            $template = $this->getControllerTemplate($controllerName);
+
+            // Write file
+            if (!is_dir(dirname($filePath))) {
+                mkdir(dirname($filePath), 0755, true);
+            }
+
+            file_put_contents($filePath, $template);
+
+            return [
+                'success' => true,
+                'file' => $filePath,
+                'class' => $controllerName,
+                'message' => "Controller {$controllerName} created successfully!"
+            ];
+
+        } catch (Exception $e) {
+            return ['success' => false, 'error' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * 📊 GENERATE MODEL
+     */
+    private function generateModel($name)
+    {
+        try {
+            // Ensure proper naming convention
+            $modelName = $this->formatClassName($name, 'Model');
+            $fileName = $modelName . '.php';
+            $filePath = APPLICATION_DIRECTORY . '/Models/' . $fileName;
+
+            // Check if file already exists
+            if (file_exists($filePath)) {
+                return ['success' => false, 'error' => "Model {$modelName} already exists!"];
+            }
+
+            // Generate model template
+            $template = $this->getModelTemplate($modelName, $name);
+
+            // Write file
+            if (!is_dir(dirname($filePath))) {
+                mkdir(dirname($filePath), 0755, true);
+            }
+
+            file_put_contents($filePath, $template);
+
+            return [
+                'success' => true,
+                'file' => $filePath,
+                'class' => $modelName,
+                'message' => "Model {$modelName} created successfully!"
+            ];
+
+        } catch (Exception $e) {
+            return ['success' => false, 'error' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * 🎨 GENERATE COMPONENT
+     */
+    private function generateComponent($name)
+    {
+        try {
+            // Handle nested components (e.g., Form.CustomInput)
+            $parts = explode('.', $name);
+            $componentName = array_pop($parts);
+            $namespace = implode('/', $parts);
+
+            $fileName = $componentName . '.php';
+            $componentDir = APPLICATION_DIRECTORY . '/Components';
+
+            if ($namespace) {
+                $componentDir .= '/' . $namespace;
+            }
+
+            $filePath = $componentDir . '/' . $fileName;
+
+            // Check if file already exists
+            if (file_exists($filePath)) {
+                return ['success' => false, 'error' => "Component {$name} already exists!"];
+            }
+
+            // Generate component template
+            $template = $this->getComponentTemplate($componentName, $namespace);
+
+            // Write file
+            if (!is_dir(dirname($filePath))) {
+                mkdir(dirname($filePath), 0755, true);
+            }
+
+            file_put_contents($filePath, $template);
+
+            return [
+                'success' => true,
+                'file' => $filePath,
+                'component' => $name,
+                'message' => "Component {$name} created successfully!"
+            ];
+
+        } catch (Exception $e) {
+            return ['success' => false, 'error' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * 🏷️ FORMAT CLASS NAME
+     */
+    private function formatClassName($name, $suffix = '')
+    {
+        // Remove existing suffix if present
+        if ($suffix && substr($name, -strlen($suffix)) === $suffix) {
+            $name = substr($name, 0, -strlen($suffix));
+        }
+
+        // Convert to PascalCase
+        $name = str_replace(['-', '_', ' '], '', ucwords($name, '-_ '));
+
+        return $name . $suffix;
+    }
+
+    /**
+     * 📄 CONTROLLER TEMPLATE
+     */
+    private function getControllerTemplate($className)
+    {
+        $baseName = str_replace('Controller', '', $className);
+        $date = date('Y-m-d H:i:s');
+
+        return <<<PHP
+<?php
+
+/**
+ * ===============================================================
+ * {$className}
+ * ===============================================================
+ * 
+ * Generated by Hoist CLI on {$date}
+ * 
+ * This controller handles {$baseName} related requests and operations.
+ * 
+ * @package HoistPHP\\Application\\Controllers
+ * @extends Controller
+ */
+
+class {$className} extends Controller
+{
+    /**
+     * 🏠 INDEX ACTION
+     * 
+     * Default action for {$baseName}
+     */
+    public function index()
+    {
+        \$data = [
+            'title' => '{$baseName}',
+            'message' => 'Welcome to {$baseName}!'
+        ];
+
+        return \$this->instance->view->render('{$baseName}/index', \$data);
+    }
+
+    /**
+     * 👁️ SHOW ACTION
+     * 
+     * Display a specific {$baseName} record
+     */
+    public function show(\$id)
+    {
+        // TODO: Implement show logic
+        \$data = [
+            'title' => 'View {$baseName}',
+            'id' => \$id
+        ];
+
+        return \$this->instance->view->render('{$baseName}/show', \$data);
+    }
+
+    /**
+     * ➕ CREATE ACTION
+     * 
+     * Show form to create new {$baseName}
+     */
+    public function create()
+    {
+        \$data = [
+            'title' => 'Create {$baseName}'
+        ];
+
+        return \$this->instance->view->render('{$baseName}/create', \$data);
+    }
+
+    /**
+     * 💾 STORE ACTION
+     * 
+     * Process form submission to create {$baseName}
+     */
+    public function store()
+    {
+        // TODO: Implement store logic
+        \$this->instance->redirect('/{$baseName}');
+    }
+
+    /**
+     * ✏️ EDIT ACTION
+     * 
+     * Show form to edit {$baseName}
+     */
+    public function edit(\$id)
+    {
+        // TODO: Implement edit logic
+        \$data = [
+            'title' => 'Edit {$baseName}',
+            'id' => \$id
+        ];
+
+        return \$this->instance->view->render('{$baseName}/edit', \$data);
+    }
+
+    /**
+     * 🔄 UPDATE ACTION
+     * 
+     * Process form submission to update {$baseName}
+     */
+    public function update(\$id)
+    {
+        // TODO: Implement update logic
+        \$this->instance->redirect('/{$baseName}');
+    }
+
+    /**
+     * 🗑️ DELETE ACTION
+     * 
+     * Delete a {$baseName} record
+     */
+    public function delete(\$id)
+    {
+        // TODO: Implement delete logic
+        \$this->instance->redirect('/{$baseName}');
+    }
+}
+
+PHP;
+    }
+
+    /**
+     * 📄 MODEL TEMPLATE
+     */
+    private function getModelTemplate($className, $tableName)
+    {
+        $date = date('Y-m-d H:i:s');
+        $table = strtolower($tableName);
+
+        return <<<PHP
+<?php
+
+/**
+ * ===============================================================
+ * {$className}
+ * ===============================================================
+ * 
+ * Generated by Hoist CLI on {$date}
+ * 
+ * This model handles {$tableName} data operations and business logic.
+ * Uses FileDatabase for JSON-based storage with enhanced query capabilities.
+ * 
+ * @package HoistPHP\\Application\\Models
+ * @version 1.0.0
+ */
+class {$className}
+{
+    /**
+     * FileDatabase instance for data operations.
+     * 
+     * @var FileDatabase JSON-based database instance
+     * @access private
+     */
+    private \$fileDatabase;
+
+    /**
+     * Table name for data storage.
+     * 
+     * @var string Table name in FileDatabase
+     * @access public
+     */
+    public \$table = "{$table}";
+
+    /**
+     * Initializes the {$className} with FileDatabase connection.
+     * 
+     * @param Instance|null \$instance Framework instance (for compatibility)
+     */
+    public function __construct(\$instance = null)
+    {
+        \$this->fileDatabase = new FileDatabase('app');
+    }
+
+    /**
+     * Retrieves a single record from FileDatabase.
+     * 
+     * @param array \$where Filter conditions for lookup
+     * @return array|null Single record or null if not found
+     */
+    public function get(\$where = [])
+    {
+        \$query = \$this->fileDatabase->table(\$this->table);
+
+        foreach (\$where as \$field => \$value) {
+            \$query->where(\$field, '=', \$value);
+        }
+
+        return \$query->first();
+    }
+
+    /**
+     * Retrieves multiple records from FileDatabase.
+     * 
+     * @param array \$where Filter conditions and query options
+     * @return array Array of records (empty array if none found)
+     */
+    public function getMany(\$where = [])
+    {
+        \$query = \$this->fileDatabase->table(\$this->table);
+
+        // Apply where conditions
+        \$whereConditions = \$where;
+        \$limit = null;
+
+        // Extract ORDER BY if present
+        if (isset(\$where['ORDER'])) {
+            \$orderBy = \$where['ORDER'];
+            unset(\$whereConditions['ORDER']);
+
+            foreach (\$orderBy as \$field => \$direction) {
+                \$query->order(\$field, \$direction);
+            }
+        }
+
+        // Extract LIMIT if present
+        if (isset(\$where['LIMIT'])) {
+            \$limit = \$where['LIMIT'];
+            unset(\$whereConditions['LIMIT']);
+        }
+
+        // Apply remaining where conditions
+        foreach (\$whereConditions as \$field => \$value) {
+            \$query->where(\$field, '=', \$value);
+        }
+
+        // Execute query with or without limit
+        if (\$limit) {
+            return \$query->all(\$limit);
+        } else {
+            return \$query->all();
+        }
+    }
+
+    /**
+     * Creates a new record in FileDatabase.
+     * 
+     * @param array \$data Data to insert
+     * @return mixed ID of newly created record, or false on failure
+     */
+    public function create(\$data)
+    {
+        // Add timestamp
+        if (!isset(\$data['created_at'])) {
+            \$data['created_at'] = date('Y-m-d H:i:s');
+        }
+
+        return \$this->fileDatabase->table(\$this->table)->insert(\$data);
+    }
+
+    /**
+     * Updates existing records in FileDatabase.
+     * 
+     * @param array \$where Update conditions
+     * @param array \$data Data to update
+     * @return bool True on success, false on failure
+     */
+    public function save(\$where, \$data)
+    {
+        // Add update timestamp
+        \$data['updated_at'] = date('Y-m-d H:i:s');
+
+        \$query = \$this->fileDatabase->table(\$this->table);
+
+        foreach (\$where as \$field => \$value) {
+            \$query->where(\$field, '=', \$value);
+        }
+
+        return \$query->update(\$data);
+    }
+
+    /**
+     * Deletes records from FileDatabase.
+     * 
+     * @param array \$where Delete conditions
+     * @param bool \$soft Whether to soft delete (mark as deleted) or hard delete
+     * @return bool True on success, false on failure
+     */
+    public function delete(\$where, \$soft = true)
+    {
+        if (\$soft) {
+            return \$this->save(\$where, ['deleted' => 1, 'deleted_at' => date('Y-m-d H:i:s')]);
+        } else {
+            // Use soft delete for now
+            return \$this->save(\$where, ['deleted' => 1, 'deleted_at' => date('Y-m-d H:i:s')]);
+        }
+    }
+
+    /**
+     * Counts records in FileDatabase.
+     * 
+     * @param array \$where Filter conditions
+     * @return int Number of matching records
+     */
+    public function count(\$where = [])
+    {
+        return count(\$this->getMany(\$where));
+    }
+
+    /**
+     * Returns all active records ordered by created_at.
+     * 
+     * @return array Array of all active records
+     */
+    public function all()
+    {
+        return \$this->getMany([
+            'deleted' => 0,
+            'ORDER' => [
+                'created_at' => 'DESC'
+            ]
+        ]);
+    }
+
+    /**
+     * Lists records with pagination and filters.
+     * 
+     * @param int \$limit Maximum number of records to return
+     * @param array \$filters Additional filter conditions
+     * @return array Array of filtered records
+     */
+    public function list(\$limit = 50, \$filters = [])
+    {
+        return \$this->getMany(array_merge([
+            'deleted' => 0,
+            'LIMIT' => \$limit
+        ], \$filters));
+    }
+
+    /**
+     * Gets a record by its ID.
+     * 
+     * @param int|null \$id Record ID
+     * @return array|false Record data or false if not found
+     */
+    public function getById(\$id = null)
+    {
+        if (is_null(\$id)) {
+            return false;
+        }
+
+        return \$this->get([
+            'deleted' => 0,
+            'id' => \$id
+        ]);
+    }
+
+    /**
+     * Gets the most recently created records.
+     * 
+     * @param int \$limit Number of latest records to return
+     * @return array Array of latest records
+     */
+    public function latest(\$limit = 5)
+    {
+        return \$this->getMany([
+            'deleted' => 0,
+            'ORDER' => [
+                'created_at' => 'DESC'
+            ],
+            'LIMIT' => \$limit
+        ]);
+    }
+}
+
+PHP;
+    }
+
+    /**
+     * 📄 COMPONENT TEMPLATE
+     */
+    private function getComponentTemplate($componentName, $namespace = '')
+    {
+        $date = date('Y-m-d H:i:s');
+        $fullName = $namespace ? $namespace . '.' . $componentName : $componentName;
+
+        return <<<PHP
+<?php
+
+/**
+ * ===============================================================
+ * {$componentName} Component
+ * ===============================================================
+ * 
+ * Generated by Hoist CLI on {$date}
+ * 
+ * Reusable UI component: {$fullName}
+ * 
+ * USAGE:
+ * \$html = \$instance->component('{$fullName}', [
+ *     'title' => 'Hello World',
+ *     'content' => 'Component content here',
+ *     'class' => 'custom-class'
+ * ]);
+ * 
+ * @package HoistPHP\\Application\\Components
+ */
+
+return function (\$instance, \$data = []) {
+    \$title = \$data['title'] ?? 'Default Title';
+    \$content = \$data['content'] ?? '';
+    \$class = \$data['class'] ?? '';
+    \$id = \$data['id'] ?? '';
+
+    // Build classes with Tailwind CSS defaults
+    \$baseClasses = 'component-{$componentName} p-4 border border-gray-200 rounded-lg bg-white shadow-sm';
+    \$classes = \$class ? "{\$baseClasses} {\$class}" : \$baseClasses;
+
+    \$html = '';
+
+    // Component wrapper
+    \$html .= "<div class=\"{\$classes}\"";
+    if (\$id) {
+        \$html .= " id=\"{\$id}\"";
+    }
+    \$html .= ">";
+
+    // Component title
+    if (\$title) {
+        \$html .= "<h3 class=\"text-lg font-semibold text-gray-900 mb-3\">{\$title}</h3>";
+    }
+
+    // Component content
+    \$html .= "<div class=\"component-content\">";
+    if (\$content) {
+        \$html .= \$content;
+    } else {
+        \$html .= "<p class=\"text-gray-600\">This is the {$componentName} component!</p>";
+        \$html .= "<p class=\"text-sm text-gray-500 mt-2\">Customize this component by editing the template.</p>";
+    }
+    \$html .= "</div>";
+
+    // Close wrapper
+    \$html .= "</div>";
+
+    return \$html;
+};
+
+PHP;
+    }
+}
+
+// Load CLI class and run
+require_once CORE_DIRECTORY . '/CLI/HoistCLI.php';
+
+$cli = new HoistCLI();
+exit($cli->run($argv));
