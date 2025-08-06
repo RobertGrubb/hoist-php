@@ -18,13 +18,18 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 # Copy directories
 COPY ./source /var/www/html/
 
+# Copy the entrypoint script for zero-configuration setup
+COPY ./docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 # Copy apache configuration
 COPY ./docker_files/000-default.conf /etc/apache2/sites-available/000-default.conf
 
 # Fix for apache
 RUN echo "Mutex posixsem" >> /etc/apache2/apache2.conf
 
-# Start apache service
+# Enable Apache rewrite module
 RUN a2enmod rewrite
-RUN service apache2 stop
-RUN service apache2 start
+
+# Set the entrypoint
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]

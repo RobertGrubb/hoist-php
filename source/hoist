@@ -26,9 +26,9 @@
  */
 
 // Ensure we're running from CLI
-if (php_sapi_name() !== 'cli') {
-    echo "❌ This tool must be run from the command line.\n";
-    exit(1);
+if (php_sapi_name() !== 'cli' && php_sapi_name() !== 'cli-server') {
+    http_response_code(404);
+    die("❌ CLI tool not accessible via web. Please use: php hoist [command]");
 }
 
 // Define framework paths

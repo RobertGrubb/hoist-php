@@ -108,8 +108,10 @@ require_once APPLICATION_DIRECTORY . "/Constants.php";
  * 
  * Loading these files makes all core framework functionality available
  * for use throughout the application.
+ * 
+ * Note: CLI directory is excluded as those files are only for command-line use.
  */
-foreach (glob(CORE_DIRECTORY . '/**/*.php') as $filename) {
+foreach (glob(CORE_DIRECTORY . '/Libraries/*.php') as $filename) {
     require_once $filename;
 }
 
