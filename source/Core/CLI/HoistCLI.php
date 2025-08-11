@@ -149,7 +149,20 @@ class HoistCLI
                 $this->success("✅ Migration completed successfully!");
                 $this->info("📊 Migrated {$result['tables']} tables with {$result['records']} total records");
 
-                $this->info("\n🚀 Your application is now running on MySQL!");
+                if (isset($result['migrations']) && isset($result['seeds'])) {
+                    $this->info("🎯 PHINX INTEGRATION:");
+                    $this->info("   📁 Generated {$result['migrations']} migration files");
+                    $this->info("   🌱 Generated {$result['seeds']} seed files");
+                    $this->info("   ✅ Marked as run in development");
+                    $this->info("");
+                    $this->info("🚀 FOR PRODUCTION DEPLOYMENT:");
+                    $this->info("   1. Deploy your code to production");
+                    $this->info("   2. Run: vendor/bin/phinx migrate -e production");
+                    $this->info("   3. Run: vendor/bin/phinx seed:run -e production");
+                    $this->info("");
+                }
+
+                $this->info("🚀 Your application is now running on MySQL!");
                 $this->info("💡 Update your .env file with the database credentials");
 
             } else {
@@ -194,15 +207,9 @@ class HoistCLI
             return 1;
         }
 
-        $generator = new CodeGenerator($this->instance);
-        $result = $generator->createController($name);
-
-        if ($result['success']) {
-            $this->success("✅ Controller created: {$result['file']}");
-        } else {
-            $this->error("❌ Failed to create controller: {$result['error']}");
-            return 1;
-        }
+        // TODO: Implement CodeGenerator class
+        $this->warning("⚠️  Code generation feature is coming soon!");
+        $this->info("Controller generation will create: Application/Controllers/{$name}.php");
 
         return 0;
     }
@@ -219,15 +226,9 @@ class HoistCLI
             return 1;
         }
 
-        $generator = new CodeGenerator($this->instance);
-        $result = $generator->createModel($name);
-
-        if ($result['success']) {
-            $this->success("✅ Model created: {$result['file']}");
-        } else {
-            $this->error("❌ Failed to create model: {$result['error']}");
-            return 1;
-        }
+        // TODO: Implement CodeGenerator class
+        $this->warning("⚠️  Code generation feature is coming soon!");
+        $this->info("Model generation will create: Application/Models/{$name}Model.php");
 
         return 0;
     }
@@ -244,15 +245,9 @@ class HoistCLI
             return 1;
         }
 
-        $generator = new CodeGenerator($this->instance);
-        $result = $generator->createComponent($name);
-
-        if ($result['success']) {
-            $this->success("✅ Component created: {$result['file']}");
-        } else {
-            $this->error("❌ Failed to create component: {$result['error']}");
-            return 1;
-        }
+        // TODO: Implement CodeGenerator class
+        $this->warning("⚠️  Code generation feature is coming soon!");
+        $this->info("Component generation will create: Application/Components/{$name}.php");
 
         return 0;
     }

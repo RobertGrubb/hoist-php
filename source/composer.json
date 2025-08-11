@@ -9,7 +9,8 @@
         "psr/http-factory-implementation": "*",
         "matthiasmullie/minify": "^1.3",
         "nyholm/psr7": "^1.8",
-        "consoletvs/profanity": "^3.5"
+        "consoletvs/profanity": "^3.5",
+        "robmorgan/phinx": "^0.15"
     },
     "require-dev": {
         "phpunit/phpunit": "^10.0"

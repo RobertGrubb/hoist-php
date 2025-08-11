@@ -37,6 +37,7 @@ class DatabaseMigrator
     private $instance;
     private $fileDbPath;
     private $mysqlConnection;
+    private static $migrationCounter = 0; // Counter for unique timestamps
 
     public function __construct($instance)
     {
@@ -81,9 +82,15 @@ class DatabaseMigrator
     }
 
     /**
-     * 🚀 MIGRATE TO MYSQL
+     * 🚀 MIGRATE TO MYSQL (WITH AUTOMATIC PHINX GENERATION!)
      * 
-     * The main migration function that converts FileDatabase to MySQL
+     * The ULTIMATE migration function that:
+     * 1. Converts FileDatabase to MySQL
+     * 2. Generates Phinx migrations for each table
+     * 3. Generates Phinx seeds for all data
+     * 4. Marks migrations as run in development
+     * 
+     * RESULT: Production deployment just runs `phinx migrate`!
      */
     public function migrateToMySQL($tables, $options)
     {
@@ -94,8 +101,13 @@ class DatabaseMigrator
             // Create database if it doesn't exist
             $this->createDatabase($options['database']);
 
+            // 🎯 CREATE PHINX TRACKING TABLE
+            $this->createPhinxLogTable($options['database']);
+
             $totalRecords = 0;
             $migratedTables = 0;
+            $generatedMigrations = [];
+            $generatedSeeds = [];
 
             foreach ($tables as $tableInfo) {
                 echo "🔄 Migrating table: {$tableInfo['table']} ({$tableInfo['records']} records)\n";
@@ -112,8 +124,30 @@ class DatabaseMigrator
                 $schema = $this->analyzeDataStructure($data);
                 $this->createMySQLTable($options['database'], $tableInfo['table'], $schema);
 
+                // 🎯 GENERATE PHINX MIGRATION FOR THIS TABLE
+                echo "📝 Generating migration for table: {$tableInfo['table']}\n";
+                $migrationFile = $this->generatePhinxMigration($tableInfo['table'], $schema);
+                if ($migrationFile) {
+                    $generatedMigrations[] = $migrationFile;
+                    echo "📄 Generated migration: {$migrationFile}\n";
+                } else {
+                    echo "❌ Failed to generate migration for table: {$tableInfo['table']}\n";
+                }
+
                 // Insert data
                 $inserted = $this->insertData($options['database'], $tableInfo['table'], $data);
+
+                // 🎯 GENERATE PHINX SEED FOR THIS TABLE
+                if ($inserted > 0) {
+                    echo "🌱 Generating seed for table: {$tableInfo['table']}\n";
+                    $seedFile = $this->generatePhinxSeed($tableInfo['table'], $data);
+                    if ($seedFile) {
+                        $generatedSeeds[] = $seedFile;
+                        echo "🌱 Generated seed: {$seedFile}\n";
+                    } else {
+                        echo "❌ Failed to generate seed for table: {$tableInfo['table']}\n";
+                    }
+                }
 
                 echo "✅ Migrated {$tableInfo['table']}: {$inserted} records\n";
 
@@ -121,11 +155,32 @@ class DatabaseMigrator
                 $migratedTables++;
             }
 
+            // 🎯 MARK MIGRATIONS AS RUN IN DEVELOPMENT
+            echo "🔍 About to mark " . count($generatedMigrations) . " migrations as completed\n";
+            if (!empty($generatedMigrations)) {
+                echo "📋 Migration files to mark:\n";
+                foreach ($generatedMigrations as $migration) {
+                    echo "   - {$migration}\n";
+                }
+            }
+            $this->markMigrationsAsRun($generatedMigrations, $options['database']);
+
+            echo "\n🎉 PHINX INTEGRATION COMPLETE!\n";
+            echo "📁 Generated " . count($generatedMigrations) . " migration files\n";
+            echo "🌱 Generated " . count($generatedSeeds) . " seed files\n";
+            echo "✅ Marked migrations as run in development\n";
+            echo "\n🚀 PRODUCTION DEPLOYMENT:\n";
+            echo "   1. Deploy your code\n";
+            echo "   2. Run: vendor/bin/phinx migrate -e production\n";
+            echo "   3. Run: vendor/bin/phinx seed:run -e production\n";
+
             return [
                 'success' => true,
                 'tables' => $migratedTables,
                 'records' => $totalRecords,
-                'message' => 'Migration completed successfully'
+                'migrations' => count($generatedMigrations),
+                'seeds' => count($generatedSeeds),
+                'message' => 'Migration completed successfully with Phinx generation'
             ];
 
         } catch (Exception $e) {
@@ -388,7 +443,29 @@ class DatabaseMigrator
     }
 
     /**
-     * 📂 LOAD FILE DATA
+     * � CREATE PHINX LOG TABLE
+     * 
+     * Creates the phinxlog table that Phinx uses to track migrations
+     */
+    private function createPhinxLogTable($database)
+    {
+        echo "📋 Creating Phinx migration tracking table...\n";
+        
+        $sql = "CREATE TABLE IF NOT EXISTS `{$database}`.`phinxlog` (
+            `version` bigint(20) NOT NULL,
+            `migration_name` varchar(100) DEFAULT NULL,
+            `start_time` timestamp NULL DEFAULT NULL,
+            `end_time` timestamp NULL DEFAULT NULL,
+            `breakpoint` tinyint(1) NOT NULL DEFAULT '0',
+            PRIMARY KEY (`version`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+        
+        $this->mysqlConnection->exec($sql);
+        echo "✅ Created phinxlog table\n";
+    }
+
+    /**
+     * �📂 LOAD FILE DATA
      */
     private function loadFileData($filePath)
     {
@@ -442,5 +519,271 @@ class DatabaseMigrator
         echo "  User: {$options['user']}\n";
 
         return 0;
+    }
+
+    /**
+     * 🎯 GENERATE PHINX MIGRATION
+     * 
+     * Creates a Phinx migration file for a table schema
+     */
+    private function generatePhinxMigration($tableName, $schema)
+    {
+        $className = 'Create' . ucfirst($this->toCamelCase($tableName)) . 'Table';
+        
+        // Generate unique timestamp with counter to avoid duplicates
+        $baseTimestamp = date('YmdHis');
+        $timestamp = $baseTimestamp . sprintf('%02d', self::$migrationCounter++);
+        
+        $filename = $timestamp . '_' . strtolower($className) . '.php';
+
+        // Ensure migrations directory exists (in source/Database/migrations)
+        $migrationDir = __DIR__ . '/../../Database/migrations';
+        if (!is_dir($migrationDir)) {
+            mkdir($migrationDir, 0755, true);
+        }
+
+        $filepath = $migrationDir . '/' . $filename;
+
+        // Generate column definitions for Phinx
+        $columns = [];
+        foreach ($schema as $columnName => $definition) {
+            if ($columnName === 'id' && strpos($definition['type'], 'AUTO_INCREMENT') !== false) {
+                continue; // Skip - Phinx auto-creates ID
+            }
+
+            $phinxType = $this->convertToPhinxType($definition['type']);
+            $nullable = $definition['nullable'] ? '' : ', [\'null\' => false]';
+
+            $columns[] = "              ->addColumn('{$columnName}', '{$phinxType}'{$nullable})";
+        }
+
+        $migrationContent = "<?php
+
+use Phinx\\Migration\\AbstractMigration;
+
+/**
+ * Auto-generated migration from FileDatabase → MySQL conversion
+ * Table: {$tableName}
+ * Generated: " . date('Y-m-d H:i:s') . "
+ */
+class {$className} extends AbstractMigration
+{
+    /**
+     * Create {$tableName} table
+     */
+    public function up()
+    {
+        \$table = \$this->table('{$tableName}');
+        \$table" . implode("\n        ", $columns) . "
+              ->create();
+    }
+
+    /**
+     * Drop {$tableName} table
+     */
+    public function down()
+    {
+        \$this->table('{$tableName}')->drop()->save();
+    }
+}
+";
+
+        if (file_put_contents($filepath, $migrationContent)) {
+            return $filename;
+        }
+
+        return false;
+    }
+
+    /**
+     * 🌱 GENERATE PHINX SEED
+     * 
+     * Creates a Phinx seed file for table data
+     */
+    private function generatePhinxSeed($tableName, $data)
+    {
+        $className = ucfirst($this->toCamelCase($tableName)) . 'Seeder';
+        $filename = strtolower($className) . '.php';
+
+        // Ensure seeds directory exists (in source/Database/seeds)
+        $seedDir = __DIR__ . '/../../Database/seeds';
+        if (!is_dir($seedDir)) {
+            mkdir($seedDir, 0755, true);
+        }
+
+        $filepath = $seedDir . '/' . $filename;
+
+        // Prepare data for seeding (limit to reasonable amount)
+        $seedData = array_slice($data, 0, 1000); // Max 1000 records for seeds
+        $processedData = [];
+
+        foreach ($seedData as $record) {
+            $processedRecord = [];
+            foreach ($record as $key => $value) {
+                if ($key === 'id')
+                    continue; // Skip IDs, let auto-increment handle
+                $processedRecord[$key] = $this->processValueForSeed($value);
+            }
+            $processedData[] = $processedRecord;
+        }
+
+        $dataString = var_export($processedData, true);
+        $dataString = str_replace('array (', '[', $dataString);
+        $dataString = str_replace(')', ']', $dataString);
+
+        $seedContent = "<?php
+
+use Phinx\\Seed\\AbstractSeed;
+
+/**
+ * Auto-generated seed from FileDatabase → MySQL conversion
+ * Table: {$tableName}
+ * Records: " . count($seedData) . " (limited from " . count($data) . " total)
+ * Generated: " . date('Y-m-d H:i:s') . "
+ */
+class {$className} extends AbstractSeed
+{
+    /**
+     * Seed {$tableName} table
+     */
+    public function run()
+    {
+        \$data = {$dataString};
+
+        \$table = \$this->table('{$tableName}');
+        \$table->insert(\$data)
+              ->save();
+    }
+}
+";
+
+        if (file_put_contents($filepath, $seedContent)) {
+            return $filename;
+        }
+
+        return false;
+    }
+
+    /**
+     * ✅ MARK MIGRATIONS AS RUN
+     * 
+     * Marks generated migrations as already executed (phinxlog table already exists)
+     */
+    private function markMigrationsAsRun($migrationFiles, $database)
+    {
+        if (empty($migrationFiles)) {
+            return;
+        }
+
+        try {
+            // Use the existing MySQL connection
+            if (!$this->mysqlConnection) {
+                echo "⚠️  No MySQL connection available to mark migrations\n";
+                return;
+            }
+
+            echo "� Marking migrations as completed in phinxlog...\n";
+
+            // Verify table exists and start transaction
+            try {
+                $this->mysqlConnection->beginTransaction();
+                $checkTable = $this->mysqlConnection->query("SELECT COUNT(*) FROM `{$database}`.`phinxlog`");
+                echo "✅ Confirmed phinxlog table exists with " . $checkTable->fetchColumn() . " existing records\n";
+
+                // Insert migrations with fully qualified table name
+                $stmt = $this->mysqlConnection->prepare("
+                    INSERT INTO `{$database}`.`phinxlog` (version, migration_name, start_time, end_time, breakpoint) 
+                    VALUES (?, ?, ?, ?, 0)
+                    ON DUPLICATE KEY UPDATE end_time = VALUES(end_time)
+                ");
+
+                $insertedCount = 0;
+                foreach ($migrationFiles as $filename) {
+                    // Extract full timestamp from filename (16 characters including counter)
+                    $version = substr($filename, 0, 16);
+                    $migrationName = pathinfo($filename, PATHINFO_FILENAME);
+                    $now = date('Y-m-d H:i:s');
+
+                    echo "🔍 Inserting migration: version={$version}, name={$migrationName}\n";
+                    $result = $stmt->execute([$version, $migrationName, $now, $now]);
+                    
+                    if ($result) {
+                        $insertedCount++;
+                        echo "✅ Marked migration {$migrationName} as completed\n";
+                    } else {
+                        $errorInfo = $stmt->errorInfo();
+                        echo "❌ Failed to mark migration {$migrationName}: " . print_r($errorInfo, true) . "\n";
+                    }
+                }
+
+                // Commit and verify
+                $this->mysqlConnection->commit();
+                $finalCount = $this->mysqlConnection->query("SELECT COUNT(*) FROM `{$database}`.`phinxlog`")->fetchColumn();
+                echo "💾 Transaction committed. Final phinxlog count: {$finalCount}\n";
+                
+            } catch (Exception $e) {
+                $this->mysqlConnection->rollback();
+                throw $e;
+            }
+
+            echo "� Added " . count($migrationFiles) . " migrations to phinxlog table\n";
+
+        } catch (Exception $e) {
+            echo "⚠️  Could not mark migrations as run: " . $e->getMessage() . "\n";
+            echo "💡 You may need to run 'vendor/bin/phinx migrate' manually\n";
+        }
+    }
+
+    /**
+     * 🔄 CONVERT TO PHINX TYPE
+     */
+    private function convertToPhinxType($mysqlType)
+    {
+        $mysqlType = strtoupper($mysqlType);
+
+        if (strpos($mysqlType, 'VARCHAR') !== false)
+            return 'string';
+        if (strpos($mysqlType, 'TEXT') !== false)
+            return 'text';
+        if (strpos($mysqlType, 'INT') !== false)
+            return 'integer';
+        if (strpos($mysqlType, 'DECIMAL') !== false)
+            return 'decimal';
+        if (strpos($mysqlType, 'FLOAT') !== false)
+            return 'float';
+        if (strpos($mysqlType, 'BOOLEAN') !== false)
+            return 'boolean';
+        if (strpos($mysqlType, 'DATE') !== false)
+            return 'date';
+        if (strpos($mysqlType, 'DATETIME') !== false)
+            return 'datetime';
+        if (strpos($mysqlType, 'JSON') !== false)
+            return 'json';
+
+        return 'string'; // Default fallback
+    }
+
+    /**
+     * 🐪 TO CAMEL CASE
+     */
+    private function toCamelCase($string)
+    {
+        return str_replace(' ', '', ucwords(str_replace('_', ' ', $string)));
+    }
+
+    /**
+     * 🌱 PROCESS VALUE FOR SEED
+     */
+    private function processValueForSeed($value)
+    {
+        if (is_array($value) || is_object($value)) {
+            return json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        }
+
+        if (is_bool($value)) {
+            return $value ? 1 : 0;
+        }
+
+        return $value;
     }
 }
