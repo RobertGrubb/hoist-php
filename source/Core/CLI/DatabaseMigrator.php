@@ -171,8 +171,13 @@ class DatabaseMigrator
                 $value = $data[$i][$key];
                 $types[] = $this->detectDataType($value);
 
+                // Calculate length based on final stored format
                 if (is_string($value)) {
                     $maxLength = max($maxLength, strlen($value));
+                } elseif (is_array($value) || is_object($value)) {
+                    // For arrays/objects, calculate JSON string length
+                    $jsonString = json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+                    $maxLength = max($maxLength, strlen($jsonString));
                 }
             }
 
@@ -207,6 +212,8 @@ class DatabaseMigrator
             return 'INTEGER';
         if (is_float($value))
             return 'FLOAT';
+        if (is_array($value) || is_object($value))
+            return 'JSON'; // Arrays and objects become JSON columns
 
         if (is_string($value)) {
             // Check for common patterns
@@ -255,6 +262,8 @@ class DatabaseMigrator
                     return 'DATE';
                 case 'DATETIME':
                     return 'DATETIME';
+                case 'JSON':
+                    return 'JSON';
                 case 'TEXT':
                     return 'TEXT';
                 case 'VARCHAR':
@@ -264,6 +273,8 @@ class DatabaseMigrator
         }
 
         // Mixed types - use most permissive
+        if (in_array('JSON', $uniqueTypes))
+            return 'JSON'; // If any JSON data, use JSON column
         if (in_array('TEXT', $uniqueTypes))
             return 'TEXT';
         if (in_array('VARCHAR', $uniqueTypes)) {
@@ -307,7 +318,13 @@ class DatabaseMigrator
             if (!is_array($record))
                 continue;
 
-            $columns = array_keys($record);
+            // Process record values to handle arrays/objects
+            $processedRecord = [];
+            foreach ($record as $key => $value) {
+                $processedRecord[$key] = $this->processValueForMySQL($value);
+            }
+
+            $columns = array_keys($processedRecord);
             $placeholders = array_fill(0, count($columns), '?');
 
             $sql = "INSERT INTO `{$database}`.`{$tableName}` (`" .
@@ -315,11 +332,37 @@ class DatabaseMigrator
                 implode(', ', $placeholders) . ")";
 
             $stmt = $this->mysqlConnection->prepare($sql);
-            $stmt->execute(array_values($record));
+            $stmt->execute(array_values($processedRecord));
             $inserted++;
         }
 
         return $inserted;
+    }
+
+    /**
+     * 🔄 PROCESS VALUE FOR MYSQL
+     * 
+     * Converts PHP values to MySQL-compatible format
+     */
+    private function processValueForMySQL($value)
+    {
+        // Handle arrays and objects - convert to JSON
+        if (is_array($value) || is_object($value)) {
+            return json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        }
+
+        // Handle booleans - convert to integers for MySQL
+        if (is_bool($value)) {
+            return $value ? 1 : 0;
+        }
+
+        // Handle null values
+        if (is_null($value)) {
+            return null;
+        }
+
+        // For everything else (strings, numbers), return as-is
+        return $value;
     }
 
     /**
@@ -386,8 +429,9 @@ class DatabaseMigrator
 
                 echo "Schema:\n";
                 foreach ($schema as $column => $definition) {
-                    echo "  - {$column}: {$definition['type']}" .
-                        ($definition['nullable'] ? ' (nullable)' : '') . "\n";
+                    $nullable = $definition['nullable'] ? ' (nullable)' : '';
+                    $jsonNote = ($definition['type'] === 'JSON') ? ' ← arrays/objects converted to JSON' : '';
+                    echo "  - {$column}: {$definition['type']}{$nullable}{$jsonNote}\n";
                 }
             }
         }

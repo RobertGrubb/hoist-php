@@ -6,8 +6,10 @@ Welcome to the comprehensive API documentation for the Hoist PHP Framework. This
 
 ### 🗂️ Documentation Structure
 
+-   **[DatabaseAdapter API](./DatabaseAdapter.md)** - Unified database interface for seamless migration ⭐ **NEW!**
 -   **[Authentication API](./Authentication.md)** - User authentication, sessions, and security
 -   **[Database API](./Database.md)** - Database connections and query operations
+-   **[FileDatabase API](./FileDatabase.md)** - JSON-based database system
 -   **[Router API](./Router.md)** - URL routing and request handling
 -   **[Request API](./Request.md)** - HTTP request processing
 -   **[Response API](./Response.md)** - HTTP response generation
@@ -40,13 +42,14 @@ class HomeController extends Controller
 {
     public function index()
     {
-        // Access framework services
-        $user = $this->auth->user;
-        $data = $this->models->user->getAllUsers();
+        // 🚀 NEW: Use unified database interface
+        $users = $this->instance->db->table('users')
+                                    ->where('status', '=', 'active')
+                                    ->order('name', 'ASC')
+                                    ->all();
 
         $this->view->render('home/index', [
-            'user' => $user,
-            'users' => $data
+            'users' => $users
         ]);
     }
 }
@@ -77,8 +80,10 @@ The Hoist PHP Framework follows these core principles:
 All controllers have automatic access to these services through `$this->`:
 
 ```php
+$this->db         // 🚀 NEW: Unified database interface (FileDatabase + MySQL)
 $this->auth       // Authentication & authorization
 $this->database   // Optional MySQL database (if configured)
+$this->fileDatabase // JSON-based database (primary storage)
 $this->request    // HTTP request handling
 $this->response   // HTTP response generation
 $this->session    // Session management

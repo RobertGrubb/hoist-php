@@ -95,6 +95,9 @@ class Instance
     /** @var Components High-performance component rendering service */
     public $components;
 
+    /** @var DatabaseAdapter Unified database interface for seamless migration */
+    public $db;
+
     // ===============================================================
     // APPLICATION STATE PROPERTIES
     // ===============================================================
@@ -154,7 +157,8 @@ class Instance
         "View",
         "Cron",
         "Cache",
-        "Components"
+        "Components",
+        "DatabaseAdapter"
     ];
 
     // ===============================================================
@@ -392,6 +396,15 @@ class Instance
         if (!$this->isCommandLine()) {
             $this->components = new Components($this);
         }
+
+        /**
+         * Initialize unified database adapter for seamless migration.
+         * 
+         * The DatabaseAdapter provides a unified interface that maintains
+         * FileDatabase's chainable syntax while automatically routing
+         * to MySQL when available. This enables true seamless migration.
+         */
+        $this->db = new DatabaseAdapter($this);
     }
 
     // ===============================================================
